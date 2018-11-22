@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	gitsemv "github.com/linyows/git-semv"
+	"github.com/linyows/git-semv/git"
 )
 
 func main() {
-	v, _ := gitsemv.New()
+	v, _ := semv.New()
 	fmt.Printf("%s\n", v.Current)
 	v.BumpMajor()
 	fmt.Printf("%s\n", v.Next)
