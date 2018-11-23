@@ -1,20 +1,22 @@
 package main
 
 import (
-	"fmt"
+	"os"
+)
 
-	"github.com/linyows/git-semv/git"
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
 )
 
 func main() {
-	v, _ := semv.New()
-	fmt.Printf("%s\n", v.Current)
-	v.BumpMajor()
-	fmt.Printf("%s\n", v.Next)
-	v.BumpMinor()
-	fmt.Printf("%s\n", v.Next)
-	v.BumpPatch()
-	fmt.Printf("%s\n", v.Next)
-	v.BumpPre()
-	fmt.Printf("%s\n", v.Next)
+	cli := &CLI{
+		outStream: os.Stdout,
+		errStream: os.Stderr,
+		Prefix:    "v",
+		Minor:     true,
+		Pre:       false,
+	}
+	cli.run(os.Args[1:])
 }
