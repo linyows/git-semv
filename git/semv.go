@@ -17,12 +17,13 @@ var defaultPreVersionPrefix = "rc"
 
 // Semv struct
 type Semv struct {
-	Current semver.Version
-	Next    semver.Version
+	prefix  string
+	current semver.Version
+	next    semver.Version
 }
 
 // New returns Semv
-func New() (*Semv, error) {
+func New(p string) (*Semv, error) {
 	if cmder == nil {
 		cmder = Cmd{}
 	}
@@ -32,63 +33,87 @@ func New() (*Semv, error) {
 		return nil, err
 	}
 
-	v := defaultVersion
+	strV := defaultVersion
 
 	if len(bytes.TrimSpace(b)) > 0 {
-		v = strings.Split(string(b), "\n")[0]
+		strV = strings.Split(string(b), "\n")[0]
 	}
 
-	vv, err := semver.ParseTolerant(v)
+	semV, err := semver.ParseTolerant(strV)
 	if err != nil {
 		return nil, err
 	}
-	return &Semv{Current: vv}, err
+
+	copiedV := semV
+	return &Semv{prefix: p, current: semV, next: copiedV}, err
+}
+
+// String return current version
+func (v *Semv) String() string {
+	return v.Current()
+}
+
+// Current return current version
+func (v *Semv) Current() string {
+	return v.prefix + v.current.String()
+}
+
+// Next return next version
+func (v *Semv) Next() string {
+	return v.prefix + v.next.String()
+}
+
+// Bump bump version by argument
+func (v *Semv) Bump(target string, pre bool) string {
+	switch target {
+	case "major":
+		v.BumpMajor()
+	case "minor":
+		v.BumpMinor()
+	case "patch":
+		v.BumpPatch()
+	}
+	if pre {
+		v.BumpPre()
+	}
+	return v.Next()
 }
 
 // BumpMajor bump version for major version
 func (v *Semv) BumpMajor() {
-	copy := v.Current
-	v.Next = copy
-	v.Next.Major++
-	v.Next.Minor = 0
-	v.Next.Patch = 0
-	v.Next.Pre = nil
+	v.next.Major++
+	v.next.Minor = 0
+	v.next.Patch = 0
+	v.next.Pre = nil
 }
 
 // BumpMinor bump version for minor version
 func (v *Semv) BumpMinor() {
-	copy := v.Current
-	v.Next = copy
-	v.Next.Minor++
-	v.Next.Patch = 0
-	v.Next.Pre = nil
+	v.next.Minor++
+	v.next.Patch = 0
+	v.next.Pre = nil
 }
 
 // BumpPatch bump version for patch version
 func (v *Semv) BumpPatch() {
-	copy := v.Current
-	v.Next = copy
-	v.Next.Patch++
-	v.Next.Pre = nil
+	v.next.Patch++
+	v.next.Pre = nil
 }
 
 // BumpPre bump version for pre version
 func (v *Semv) BumpPre() {
-	copy := v.Current
-	v.Next = copy
-
-	if len(v.Next.Pre) > 0 {
+	if len(v.next.Pre) > 0 {
 		notB := true
-		for i, pre := range v.Next.Pre {
+		for i, pre := range v.next.Pre {
 			if pre.IsNumeric() {
-				v.Next.Pre[i].VersionNum++
+				v.next.Pre[i].VersionNum++
 				notB = false
 			}
 		}
 		if notB {
 			p, err := semver.NewPRVersion(defaultPreVersion)
 			if err == nil {
-				v.Next.Pre = append(v.Next.Pre, p)
+				v.next.Pre = append(v.next.Pre, p)
 			}
 		}
 		return
@@ -96,11 +121,11 @@ func (v *Semv) BumpPre() {
 
 	prefix, err := semver.NewPRVersion(defaultPreVersionPrefix)
 	if err == nil {
-		v.Next.Pre = append(v.Next.Pre, prefix)
+		v.next.Pre = append(v.next.Pre, prefix)
 	}
 
 	prever, err := semver.NewPRVersion(defaultPreVersion)
 	if err == nil {
-		v.Next.Pre = append(v.Next.Pre, prever)
+		v.next.Pre = append(v.next.Pre, prever)
 	}
 }
