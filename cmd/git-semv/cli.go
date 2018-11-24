@@ -131,26 +131,37 @@ func (c *CLI) run(a []string) {
 		return
 	}
 
-	c.Command = args[0]
+	if len(args) > 0 {
+		c.Command = args[0]
+	} else {
+		c.Command = "list"
+	}
 
 	if len(args) > 1 {
 		c.Args = args[1:]
 	}
 
 	switch c.Command {
-	case "now":
+	case "list":
 		semv, err := semv.New(c.Prefix)
 		if err != nil {
 			fmt.Printf("%#v\n", err)
 		}
 		fmt.Printf("%s\n", semv)
 
+	case "now", "current":
+		semv, err := semv.New(c.Prefix)
+		if err != nil {
+			fmt.Printf("%#v\n", err)
+		}
+		fmt.Printf("%s\n", semv.Current())
+
 	case "major", "minor", "patch":
 		semv, err := semv.New(c.Prefix)
 		if err != nil {
 			fmt.Printf("%#v\n", err)
 		}
-		fmt.Printf("%s\n", semv.Bump(c.Command, false))
+		fmt.Printf("%s\n", semv.Next(c.Command, false))
 
 	default:
 		fmt.Fprintf(c.errStream, "Error: command is not available\n")
