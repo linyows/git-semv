@@ -25,10 +25,9 @@ type CLI struct {
 	outStream, errStream io.Writer
 	Command              string
 	Args                 []string
-	Major                bool   `long:"major" short:"M" description:"Major version when you make incompatible API changes"`
-	Minor                bool   `long:"minor" short:"m" description:"Minor version when you add functionality in a backwards-compatible manner: default"`
-	Patch                bool   `long:"patch" short:"p" description:"Patch version when you make backwards-compatible bug fixes"`
-	Pre                  bool   `long:"pre" short:"P" description:"Pre-Release version indicates"`
+	Pre                  string `long:"pre" short:"p" description:"Pre-Release version indicates(ex: 0.0.1-rc.0)"`
+	Build                string `long:"build" short:"b" description:"Build version indicates(ex: 0.0.1+3222d31.foo)"`
+	Bump                 string `long:"bump" short:"B" description:"Create tag and Push to origin"`
 	Prefix               string `long:"prefix" short:"x" description:"Prefix for version and tag(default: v)"`
 	Help                 bool   `long:"help" short:"h" description:"Show this help message and exit"`
 	Version              bool   `long:"version" short:"v" description:"Prints the version number"`
@@ -56,7 +55,7 @@ func (c *CLI) buildHelp(names []string) []string {
 		if s := tag.Get("short"); s != "" {
 			o = fmt.Sprintf("-%s, --%s%s", tag.Get("short"), tag.Get("long"), a)
 		} else {
-			o = fmt.Sprintf("--%s%s", tag.Get("long"), a)
+			o = fmt.Sprintf("    --%s%s", tag.Get("long"), a)
 		}
 
 		desc := tag.Get("description")
@@ -80,7 +79,7 @@ func (c *CLI) buildHelp(names []string) []string {
 			}
 			desc = buf.String()
 		}
-		help = append(help, fmt.Sprintf("  %-15s %s", o, desc))
+		help = append(help, fmt.Sprintf("  %-18s %s", o, desc))
 	}
 
 	return help
@@ -88,10 +87,9 @@ func (c *CLI) buildHelp(names []string) []string {
 
 func (c *CLI) showHelp() {
 	opts := strings.Join(c.buildHelp([]string{
-		"Major",
-		"Minor",
-		"Patch",
 		"Pre",
+		"Build",
+		"Bump",
 		"Prefix",
 		"Help",
 		"Version",
@@ -101,27 +99,16 @@ func (c *CLI) showHelp() {
 Usage: git-semv [--version] [--help] command <options>
 
 Commands:
-  now             Current version for semantic versionning
-  next            Next version for semantic versionning
-  bump            Bump version as next, and push to origin
+  list               Sorted versions
+  now                Current version
+  major              Next major version: vX.0.0
+  minor              Next minor version: v0.X.0
+  patch              Next patch version: v0.0.X
 
 Options:
 %s
 `
 	fmt.Fprintf(c.outStream, help, opts)
-}
-
-func (c *CLI) target() string {
-	if c.Major {
-		return "major"
-	}
-	if c.Minor {
-		return "minor"
-	}
-	if c.Patch {
-		return "patch"
-	}
-	return ""
 }
 
 func (c *CLI) run(a []string) {
@@ -158,14 +145,12 @@ func (c *CLI) run(a []string) {
 		}
 		fmt.Printf("%s\n", semv)
 
-	case "next":
+	case "major", "minor", "patch":
 		semv, err := semv.New(c.Prefix)
 		if err != nil {
 			fmt.Printf("%#v\n", err)
 		}
-		fmt.Printf("%s\n", semv.Bump(c.target(), c.Pre))
-
-	case "bump":
+		fmt.Printf("%s\n", semv.Bump(c.Command, false))
 
 	default:
 		fmt.Fprintf(c.errStream, "Error: command is not available\n")

@@ -15,8 +15,6 @@ func main() {
 		outStream: os.Stdout,
 		errStream: os.Stderr,
 		Prefix:    "v",
-		Minor:     true,
-		Pre:       false,
 	}
 	cli.run(os.Args[1:])
 }
