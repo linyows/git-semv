@@ -132,24 +132,7 @@ func (v *Semv) Increment(target string) *Semv {
 	return v
 }
 
-func (v *Semv) incrementMajor() {
-	v.next.Major++
-	v.next.Minor = 0
-	v.next.Patch = 0
-	v.next.Pre = nil
-}
-
-func (v *Semv) incrementMinor() {
-	v.next.Minor++
-	v.next.Patch = 0
-	v.next.Pre = nil
-}
-
-func (v *Semv) incrementPatch() {
-	v.next.Patch++
-	v.next.Pre = nil
-}
-
+// PreRelease retuns
 func (v *Semv) PreRelease(name string) {
 	if len(v.next.Pre) > 0 {
 		notB := true
@@ -179,5 +162,24 @@ func (v *Semv) PreRelease(name string) {
 	}
 }
 
+// Build retuns
 func (v *Semv) Build(name string) {
+}
+
+func (v *Semv) incrementMajor() {
+	v.next.Major++
+	v.next.Minor = 0
+	v.next.Patch = 0
+	v.next.Pre = nil
+}
+
+func (v *Semv) incrementMinor() {
+	v.next.Minor++
+	v.next.Patch = 0
+	v.next.Pre = nil
+}
+
+func (v *Semv) incrementPatch() {
+	v.next.Patch++
+	v.next.Pre = nil
 }
