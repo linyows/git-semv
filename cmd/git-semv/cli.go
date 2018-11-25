@@ -149,33 +149,37 @@ func (c *CLI) run(a []string) {
 
 	switch c.Command {
 	case "list":
-		semv, err := semv.New(c.Prefix)
+		var list *semv.List
+		if c.All {
+			list, err = semv.NewList()
+		} else {
+			list, err = semv.NewStrictList()
+		}
 		if err != nil {
 			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
 		}
-		fmt.Fprintf(c.outStream, "%s\n", semv.ListString(c.All))
+		fmt.Fprintf(c.outStream, "%s\n", list)
 
 	case "now", "current":
-		semv, err := semv.New(c.Prefix)
+		current, err := semv.Current()
 		if err != nil {
 			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
 		}
-		fmt.Printf("%s\n", semv.Current())
-		fmt.Fprintf(c.outStream, "%s\n", semv.Current())
+		fmt.Fprintf(c.outStream, "%s\n", current)
 
 	case "major", "minor", "patch":
-		semv, err := semv.New(c.Prefix)
+		current, err := semv.Current()
 		if err != nil {
 			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
 		}
-		v := semv.Increment(c.Command)
+		next := current.Next(c.Command)
 		if c.Pre {
-			v.PreRelease(c.PreName)
+			next.PreRelease(c.PreName)
 		}
 		if c.Build {
-			v.Build(c.BuildName)
+			next.Build(c.BuildName)
 		}
-		fmt.Fprintf(c.outStream, "%s\n", v.Next())
+		fmt.Fprintf(c.outStream, "%s\n", next)
 
 	default:
 		fmt.Fprintf(c.errStream, "Error: command is not available\n")
