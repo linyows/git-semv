@@ -1,151 +1,66 @@
 package semv
 
 import (
-	"bytes"
-	"strings"
-
 	"github.com/blang/semver"
 )
 
-// TagCmd for tag list
-var TagCmd = []string{"tag", "--list", "--sort=-v:refname"}
-var git = "git"
-var cmder Cmder
-var defaultVersion = "0.0.0"
 var defaultPreVersion = "0"
 var defaultPreVersionPrefix = "rc"
+var defaultTagPrefix = "v"
 
 // Semv struct
 type Semv struct {
-	prefix  string
-	current semver.Version
-	next    semver.Version
-	list    semver.Versions
-}
-
-// New returns Semv
-func New(p string) (*Semv, error) {
-	var sv semver.Version
-	list, err := List()
-
-	if len(list) > 0 {
-		sv = list[len(list)-1]
-	} else {
-		sv, err = semver.ParseTolerant(defaultVersion)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	copied := sv
-	return &Semv{
-		prefix:  p,
-		current: sv,
-		next:    copied,
-		list:    list,
-	}, err
-}
-
-// List returns list by git tag command
-func List() (semver.Versions, error) {
-	if cmder == nil {
-		cmder = Cmd{}
-	}
-
-	b, err := cmder.Do(git, TagCmd...)
-	if err != nil {
-		return nil, err
-	}
-	b = bytes.TrimSpace(b)
-
-	vv := []string{defaultVersion}
-	if len(b) > 0 {
-		vv = strings.Split(string(b), "\n")
-	}
-
-	var list semver.Versions
-	for _, v := range vv {
-		sv, err := semver.ParseTolerant(v)
-		if err != nil {
-			continue
-		}
-		list = append(list, sv)
-	}
-	semver.Sort(list)
-
-	return list, nil
-}
-
-// List returns list
-func (v *Semv) List(all bool) semver.Versions {
-	if all == true {
-		return v.list
-	}
-
-	var list semver.Versions
-	for _, vv := range v.list {
-		if len(vv.Pre) > 0 {
-			continue
-		}
-		list = append(list, vv)
-	}
-	return list
-}
-
-// ListString returns list as string
-func (v *Semv) ListString(all bool) string {
-	var list []string
-	for _, vv := range v.list {
-		if all == false && len(vv.Pre) > 0 {
-			continue
-		}
-		list = append(list, v.prefix+vv.String())
-	}
-	return strings.Join(list, "\n")
-}
-
-// String returns current version
-func (v *Semv) String() string {
-	return v.Current()
+	data           semver.Version
+	list           *List
+	preReleaseName string
+	buildName      string
 }
 
 // Current returns current version
-func (v *Semv) Current() string {
-	return v.prefix + v.current.String()
+func Current() (*Semv, error) {
+	list, err := NewStrictList()
+	if err != nil {
+		return nil, err
+	}
+	return &Semv{
+		data: list.Current(),
+		list: list,
+	}, nil
+}
+
+// String to string
+func (v *Semv) String() string {
+	return defaultTagPrefix + v.data.String()
 }
 
 // Next returns next version
-func (v *Semv) Next() string {
-	return v.prefix + v.next.String()
-}
-
-// Increment returns next version
-func (v *Semv) Increment(target string) *Semv {
+func (v *Semv) Next(target string) *Semv {
+	copied := v
 	switch target {
 	case "major":
-		v.incrementMajor()
+		copied.incrementMajor()
 	case "minor":
-		v.incrementMinor()
+		copied.incrementMinor()
 	case "patch":
-		v.incrementPatch()
+		copied.incrementPatch()
 	}
-	return v
+	return copied
 }
 
 // PreRelease retuns
 func (v *Semv) PreRelease(name string) {
-	if len(v.next.Pre) > 0 {
+	if len(v.data.Pre) > 0 {
 		notB := true
-		for i, pre := range v.next.Pre {
+		for i, pre := range v.data.Pre {
 			if pre.IsNumeric() {
-				v.next.Pre[i].VersionNum++
+				v.data.Pre[i].VersionNum++
 				notB = false
 			}
 		}
 		if notB {
 			p, err := semver.NewPRVersion(defaultPreVersion)
 			if err == nil {
-				v.next.Pre = append(v.next.Pre, p)
+				v.data.Pre = append(v.data.Pre, p)
 			}
 		}
 		return
@@ -153,12 +68,12 @@ func (v *Semv) PreRelease(name string) {
 
 	prefix, err := semver.NewPRVersion(defaultPreVersionPrefix)
 	if err == nil {
-		v.next.Pre = append(v.next.Pre, prefix)
+		v.data.Pre = append(v.data.Pre, prefix)
 	}
 
 	prever, err := semver.NewPRVersion(defaultPreVersion)
 	if err == nil {
-		v.next.Pre = append(v.next.Pre, prever)
+		v.data.Pre = append(v.data.Pre, prever)
 	}
 }
 
@@ -167,19 +82,19 @@ func (v *Semv) Build(name string) {
 }
 
 func (v *Semv) incrementMajor() {
-	v.next.Major++
-	v.next.Minor = 0
-	v.next.Patch = 0
-	v.next.Pre = nil
+	v.data.Major++
+	v.data.Minor = 0
+	v.data.Patch = 0
+	v.data.Pre = nil
 }
 
 func (v *Semv) incrementMinor() {
-	v.next.Minor++
-	v.next.Patch = 0
-	v.next.Pre = nil
+	v.data.Minor++
+	v.data.Patch = 0
+	v.data.Pre = nil
 }
 
 func (v *Semv) incrementPatch() {
-	v.next.Patch++
-	v.next.Pre = nil
+	v.data.Patch++
+	v.data.Pre = nil
 }

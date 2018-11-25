@@ -18,7 +18,7 @@ func (c MockedCmd) Do(name string, arg ...string) ([]byte, error) {
 	return []byte(c.Out), err
 }
 
-func TestNew(t *testing.T) {
+func TestCurrent(t *testing.T) {
 	cmder = MockedCmd{
 		Out: `v12.345.67
 v12.345.66
@@ -30,13 +30,13 @@ bar-0
 1.0.0
 `,
 	}
-	semv, err := New("v")
+	semv, err := Current()
 	if err != nil {
 		t.Fatalf("Error: %#v", err)
 	}
 	expected := "v12.345.67"
-	if expected != semv.Current() {
-		t.Errorf("expected %s, but %s", expected, semv.Current())
+	if expected != semv.String() {
+		t.Errorf("expected %s, but %s", expected, semv)
 	}
 }
 
@@ -45,100 +45,91 @@ func TestNewWhenTagNothing(t *testing.T) {
 		Out: `
 `,
 	}
-	semv, err := New("v")
+	semv, err := Current()
 	if err != nil {
 		t.Fatalf("Error: %#v", err)
 	}
 	expected := "v0.0.0"
 	if expected != semv.String() {
-		t.Errorf("expected %s, but %s", expected, semv.String())
+		t.Errorf("expected %s, but %s", expected, semv)
 	}
 }
 
 func TestString(t *testing.T) {
 	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := New("v")
-	v := semv.String()
-	expected := "v2.3.4-rc.2"
-
-	if expected != v {
-		t.Errorf("expected %s, but %s", expected, v)
+	semv, err := Current()
+	if err != nil {
+		t.Fatalf("Error: %#v", err)
 	}
-}
-
-func TestCurrent(t *testing.T) {
-	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := New("v")
-	v := semv.Current()
 	expected := "v2.3.4-rc.2"
 
-	if expected != v {
-		t.Errorf("expected %s, but %s", expected, v)
+	if expected != semv.String() {
+		t.Errorf("expected %s, but %s", expected, semv)
 	}
 }
 
 func TestIncrementWhenNonPre(t *testing.T) {
 	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := New("v")
-	v := semv.Increment("major").next.String()
-	expected := "3.0.0"
+	semv, _ := Current()
+	semv.Next("major")
+	expected := "v3.0.0"
 
-	if expected != v {
-		t.Errorf("expected %s, but %s", expected, v)
+	if expected != semv.String() {
+		t.Errorf("expected %s, but %s", expected, semv)
 	}
 }
 
 func TestIncrementWhenPre(t *testing.T) {
 	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := New("v")
-	semv.Increment("major").PreRelease("")
-	expected := "3.0.0-rc.0"
+	semv, _ := Current()
+	semv.Next("major").PreRelease("")
+	expected := "v3.0.0-rc.0"
 
-	if expected != semv.next.String() {
-		t.Errorf("expected %s, but %s", expected, semv.next)
+	if expected != semv.String() {
+		t.Errorf("expected %s, but %s", expected, semv)
 	}
 }
 
 func TestIncrementMajor(t *testing.T) {
 	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := New("v")
+	semv, _ := Current()
 	semv.incrementMajor()
-	expected := "3.0.0"
+	expected := "v3.0.0"
 
-	if expected != semv.next.String() {
-		t.Errorf("expected %s, but %s", expected, semv.next)
+	if expected != semv.String() {
+		t.Errorf("expected %s, but %s", expected, semv)
 	}
 }
 
 func TestIncrementMinor(t *testing.T) {
 	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := New("v")
+	semv, _ := Current()
 	semv.incrementMinor()
-	expected := "2.4.0"
+	expected := "v2.4.0"
 
-	if expected != semv.next.String() {
-		t.Errorf("expected %s, but %s", expected, semv.next)
+	if expected != semv.String() {
+		t.Errorf("expected %s, but %s", expected, semv)
 	}
 }
 
 func TestIncrementPatch(t *testing.T) {
 	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := New("v")
+	semv, _ := Current()
 	semv.incrementPatch()
-	expected := "2.3.5"
+	expected := "v2.3.5"
 
-	if expected != semv.next.String() {
-		t.Errorf("expected %s, but %s", expected, semv.next)
+	if expected != semv.String() {
+		t.Errorf("expected %s, but %s", expected, semv)
 	}
 }
 
 func TestPreRelease(t *testing.T) {
 	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := New("v")
+	semv, _ := Current()
 	semv.PreRelease("")
-	expected := "2.3.4-rc.3"
+	expected := "v2.3.4-rc.3"
 
-	if expected != semv.next.String() {
-		t.Errorf("expected %s, but %s", expected, semv.next)
+	if expected != semv.String() {
+		t.Errorf("expected %s, but %s", expected, semv)
 	}
 }
