@@ -25,9 +25,12 @@ type CLI struct {
 	outStream, errStream io.Writer
 	Command              string
 	Args                 []string
-	Pre                  string `long:"pre" short:"p" description:"Pre-Release version indicates(ex: 0.0.1-rc.0)"`
-	Build                string `long:"build" short:"b" description:"Build version indicates(ex: 0.0.1+3222d31.foo)"`
-	Bump                 string `long:"bump" short:"B" description:"Create tag and Push to origin"`
+	Pre                  bool   `long:"pre" short:"p" description:"Pre-Release version indicates(ex: 0.0.1-rc.0)"`
+	PreName              string `long:"pre-name" description:"Specify pre-release version name"`
+	Build                bool   `long:"build" short:"b" description:"Build version indicates(ex: 0.0.1+3222d31.foo)"`
+	BuildName            string `long:"build-name" description:"Specify build version name"`
+	All                  bool   `long:"all" short:"a" description:"Include everything such as pre-release and build versions in list"`
+	Bump                 bool   `long:"bump" short:"B" description:"Create tag and Push to origin"`
 	Prefix               string `long:"prefix" short:"x" description:"Prefix for version and tag(default: v)"`
 	Help                 bool   `long:"help" short:"h" description:"Show this help message and exit"`
 	Version              bool   `long:"version" short:"v" description:"Prints the version number"`
@@ -88,7 +91,10 @@ func (c *CLI) buildHelp(names []string) []string {
 func (c *CLI) showHelp() {
 	opts := strings.Join(c.buildHelp([]string{
 		"Pre",
+		"PreRelease",
 		"Build",
+		"BuildName",
+		"All",
 		"Bump",
 		"Prefix",
 		"Help",
@@ -161,7 +167,14 @@ func (c *CLI) run(a []string) {
 		if err != nil {
 			fmt.Printf("%#v\n", err)
 		}
-		fmt.Printf("%s\n", semv.Next(c.Command, false))
+		v := semv.Increment(c.Command)
+		if c.Pre {
+			v.PreRelease(c.PreName)
+		}
+		if c.Build {
+			v.Build(c.BuildName)
+		}
+		fmt.Fprintf(c.outStream, "%s\n", v.Next())
 
 	default:
 		fmt.Fprintf(c.errStream, "Error: command is not available\n")

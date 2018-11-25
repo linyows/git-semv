@@ -46,6 +46,7 @@ func New(p string) (*Semv, error) {
 	}, err
 }
 
+// List returns list by git tag command
 func List() (semver.Versions, error) {
 	if cmder == nil {
 		cmder = Cmd{}
@@ -75,55 +76,81 @@ func List() (semver.Versions, error) {
 	return list, nil
 }
 
-// String return current version
-func (v *Semv) String() string {
+// List returns list
+func (v *Semv) List(all bool) semver.Versions {
+	if all == true {
+		return v.list
+	}
+
+	var list semver.Versions
+	for _, vv := range v.list {
+		if len(vv.Pre) > 0 {
+			continue
+		}
+		list = append(list, vv)
+	}
+	return list
+}
+
+// ListString returns list as string
+func (v *Semv) ListString(all bool) string {
 	var list []string
 	for _, vv := range v.list {
+		if all == false && len(vv.Pre) > 0 {
+			continue
+		}
 		list = append(list, v.prefix+vv.String())
 	}
 	return strings.Join(list, "\n")
 }
 
-// Current return current version
+// String returns current version
+func (v *Semv) String() string {
+	return v.Current()
+}
+
+// Current returns current version
 func (v *Semv) Current() string {
 	return v.prefix + v.current.String()
 }
 
-// Next return next version
-func (v *Semv) Next(target string, pre bool) string {
-	switch target {
-	case "major":
-		v.nextMajor()
-	case "minor":
-		v.nextMinor()
-	case "patch":
-		v.nextPatch()
-	}
-	if pre {
-		v.nextPreRelease()
-	}
+// Next returns next version
+func (v *Semv) Next() string {
 	return v.prefix + v.next.String()
 }
 
-func (v *Semv) nextMajor() {
+// Increment returns next version
+func (v *Semv) Increment(target string) *Semv {
+	switch target {
+	case "major":
+		v.incrementMajor()
+	case "minor":
+		v.incrementMinor()
+	case "patch":
+		v.incrementPatch()
+	}
+	return v
+}
+
+func (v *Semv) incrementMajor() {
 	v.next.Major++
 	v.next.Minor = 0
 	v.next.Patch = 0
 	v.next.Pre = nil
 }
 
-func (v *Semv) nextMinor() {
+func (v *Semv) incrementMinor() {
 	v.next.Minor++
 	v.next.Patch = 0
 	v.next.Pre = nil
 }
 
-func (v *Semv) nextPatch() {
+func (v *Semv) incrementPatch() {
 	v.next.Patch++
 	v.next.Pre = nil
 }
 
-func (v *Semv) nextPreRelease() {
+func (v *Semv) PreRelease(name string) {
 	if len(v.next.Pre) > 0 {
 		notB := true
 		for i, pre := range v.next.Pre {
@@ -150,4 +177,7 @@ func (v *Semv) nextPreRelease() {
 	if err == nil {
 		v.next.Pre = append(v.next.Pre, prever)
 	}
+}
+
+func (v *Semv) Build(name string) {
 }
