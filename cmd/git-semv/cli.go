@@ -121,7 +121,7 @@ func (c *CLI) run(a []string) {
 	p := flags.NewParser(c, flags.PrintErrors|flags.PassDoubleDash)
 	args, err := p.ParseArgs(a)
 	if err != nil {
-		fmt.Printf("%#v\n", err)
+		fmt.Fprintf(c.errStream, "Error: %#v\n", err)
 		return
 	}
 
@@ -151,21 +151,22 @@ func (c *CLI) run(a []string) {
 	case "list":
 		semv, err := semv.New(c.Prefix)
 		if err != nil {
-			fmt.Printf("%#v\n", err)
+			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
 		}
-		fmt.Printf("%s\n", semv)
+		fmt.Fprintf(c.outStream, "%s\n", semv.ListString(c.All))
 
 	case "now", "current":
 		semv, err := semv.New(c.Prefix)
 		if err != nil {
-			fmt.Printf("%#v\n", err)
+			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
 		}
 		fmt.Printf("%s\n", semv.Current())
+		fmt.Fprintf(c.outStream, "%s\n", semv.Current())
 
 	case "major", "minor", "patch":
 		semv, err := semv.New(c.Prefix)
 		if err != nil {
-			fmt.Printf("%#v\n", err)
+			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
 		}
 		v := semv.Increment(c.Command)
 		if c.Pre {
