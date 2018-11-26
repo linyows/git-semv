@@ -1,15 +1,18 @@
 package semv
 
-type option func(*Semv) interface{}
+// Option is func
+type Option func(*Semv) interface{}
 
-func PreReleaseName(s string) option {
+// PreReleaseName for option
+func PreReleaseName(s string) Option {
 	return func(v *Semv) interface{} {
 		v.preReleaseName = s
 		return v
 	}
 }
 
-func BuildName(s string) option {
+// BuildName for option
+func BuildName(s string) Option {
 	return func(v *Semv) interface{} {
 		v.buildName = s
 		return v
