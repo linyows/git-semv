@@ -44,7 +44,8 @@ func (v *Semv) String() string {
 
 // Next returns next version
 func (v *Semv) Next(target string) *Semv {
-	copied := v
+	vv := *v
+	copied := &vv
 	switch target {
 	case "major":
 		copied.incrementMajor()
