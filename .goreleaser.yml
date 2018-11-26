@@ -1,0 +1,24 @@
+builds:
+  - main: ./cmd/git-semv
+    env:
+      - GO111MODULE=on
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+archive:
+  name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+  files:
+    - none*
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'

@@ -2,7 +2,6 @@ TEST ?= ./...
 
 default: build
 
-deps: export GO111MODULE=off
 deps:
 	go get golang.org/x/lint/golint
 	go get github.com/pierrre/gotestcover
@@ -19,3 +18,6 @@ lint:
 	golint -set_exit_status $(TEST)
 
 ci: deps test lint
+
+dist:
+	@test -z $(GITHUB_TOKEN) || goreleaser --rm-dist
