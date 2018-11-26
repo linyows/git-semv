@@ -18,7 +18,7 @@ func (c MockedCmd) Do(name string, arg ...string) ([]byte, error) {
 	return []byte(c.Out), err
 }
 
-var mixed = `v15.0.0-rc.0
+var mixed = `v13.0.0-alpha.0
 v12.345.67
 v12.345.66
 v12.344.0+20130313144700
@@ -109,18 +109,25 @@ func TestPreRelease(t *testing.T) {
 	}
 
 	tests := []struct {
+		target  string
 		preName string
 		want    string
 	}{
-		{"", "v13.0.0-rc.0"},
-		{"alpha", "v13.0.0-alpha.0"},
-		{"beta", "v13.0.0-beta.0"},
+		{"major", "", "v13.0.0-alpha.1"},
+		{"major", "beta", "v13.0.0-beta.0"},
+		{"minor", "", "v12.346.0-alpha.0"},
+		{"minor", "beta", "v12.346.0-beta.0"},
+		{"patch", "", "v12.345.68-alpha.0"},
+		{"patch", "beta", "v12.345.68-beta.0"},
 	}
 
 	for i, tt := range tests {
-		vn := v.Next("major").PreRelease(tt.preName)
+		vn, err := v.Next(tt.target).PreRelease(tt.preName)
+		if err != nil {
+			t.Fatal(err)
+		}
 		if vn.String() != tt.want {
-			t.Errorf("test[%d]: Semv(%#v) = %s; want %s", i, vn, vn, tt.want)
+			t.Errorf("test[%d]: target = %s; name = %s; Semv = %s; want %s", i, tt.target, tt.preName, vn, tt.want)
 		}
 	}
 }
