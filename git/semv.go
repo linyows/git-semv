@@ -7,15 +7,16 @@ import (
 	"github.com/blang/semver"
 )
 
-var defaultPreVersion = "0"
-var defaultPreVersionPrefix = "alpha"
-var defaultTagPrefix = "v"
-
 // UsernameCmd for git
 var UsernameCmd = []string{"config", "user.name"}
 
 // LatestCommitCmd for git
 var LatestCommitCmd = []string{"describe", "--always"}
+var usernameCmder Cmder
+var latestCommitCmder Cmder
+var defaultPreVersion = "0"
+var defaultPreVersionPrefix = "alpha"
+var defaultTagPrefix = "v"
 
 // Semv struct
 type Semv struct {
@@ -36,12 +37,12 @@ func MustNew(s string) *Semv {
 
 // Current returns current version
 func Current() (*Semv, error) {
-	list, err := NewStrictList()
+	list, err := NewList()
 	if err != nil {
 		return nil, err
 	}
 	return &Semv{
-		data: list.Current(),
+		data: list.WithoutPreRelease().Current(),
 		list: list,
 	}, nil
 }
@@ -68,10 +69,7 @@ func (v *Semv) Next(target string) *Semv {
 
 // PreRelease retuns
 func (v *Semv) PreRelease(name string) (*Semv, error) {
-	list, err := NewPreReleaseList()
-	if err != nil {
-		return nil, err
-	}
+	list := v.list.OnlyPreRelease()
 
 	prefix := name
 	if name == "" {
@@ -155,11 +153,11 @@ func (v *Semv) incrementPatch() {
 }
 
 func username() ([]byte, error) {
-	if cmder == nil {
-		cmder = Cmd{}
+	if usernameCmder == nil {
+		usernameCmder = Cmd{}
 	}
 
-	b, err := cmder.Do(git, UsernameCmd...)
+	b, err := usernameCmder.Do(git, UsernameCmd...)
 	if err != nil {
 		return nil, err
 	}
@@ -168,11 +166,11 @@ func username() ([]byte, error) {
 }
 
 func latestCommit() ([]byte, error) {
-	if cmder == nil {
-		cmder = Cmd{}
+	if latestCommitCmder == nil {
+		latestCommitCmder = Cmd{}
 	}
 
-	b, err := cmder.Do(git, LatestCommitCmd...)
+	b, err := latestCommitCmder.Do(git, LatestCommitCmd...)
 	if err != nil {
 		return nil, err
 	}

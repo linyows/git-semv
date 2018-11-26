@@ -50,13 +50,13 @@ func TestCurrent(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		cmder = MockedCmd{Out: tt.out}
+		tagCmder = MockedCmd{Out: tt.out}
 		v, err := Current()
 		if err != nil {
 			t.Fatal(err)
 		}
 		if v.String() != tt.want {
-			t.Errorf("test[%d]: Semv(%#v) = %s; want %s", i, v, v, tt.want)
+			t.Errorf("test[%d]: out = %s, Semv = %s; want %s", i, tt.out, v, tt.want)
 		}
 	}
 }
@@ -78,7 +78,7 @@ func TestString(t *testing.T) {
 }
 
 func TestNext(t *testing.T) {
-	cmder = MockedCmd{Out: mixed}
+	tagCmder = MockedCmd{Out: mixed}
 	v, err := Current()
 	if err != nil {
 		t.Fatal(err)
@@ -102,7 +102,7 @@ func TestNext(t *testing.T) {
 }
 
 func TestPreRelease(t *testing.T) {
-	cmder = MockedCmd{Out: mixed}
+	tagCmder = MockedCmd{Out: mixed}
 	v, err := Current()
 	if err != nil {
 		t.Fatal(err)

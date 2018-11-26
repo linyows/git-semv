@@ -149,14 +149,12 @@ func (c *CLI) run(a []string) {
 
 	switch c.Command {
 	case "list":
-		var list *semv.List
-		if c.All {
-			list, err = semv.NewList()
-		} else {
-			list, err = semv.NewStrictList()
-		}
+		list, err := semv.NewList()
 		if err != nil {
 			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
+		}
+		if c.All == false {
+			list = list.WithoutPreRelease()
 		}
 		fmt.Fprintf(c.outStream, "%s\n", list)
 
