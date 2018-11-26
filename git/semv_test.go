@@ -18,118 +18,163 @@ func (c MockedCmd) Do(name string, arg ...string) ([]byte, error) {
 	return []byte(c.Out), err
 }
 
-func TestCurrent(t *testing.T) {
-	cmder = MockedCmd{
-		Out: `v12.345.67
+var mixed = `v15.0.0-rc.0
+v12.345.67
 v12.345.66
-v12.344.0
+v12.344.0+20130313144700
+v12.3.0-rc
+v12.3.0-beta.5
+v12.3.0-beta
+v12.3.0-alpha.1.beta
+v12.3.0-alpha.1
+v12.3.0-alpha.0
+v12.3.0-alpha
 v12.0.1
 v8.8.8
+v2.3.4-rc.2
 foo
 bar-0
 1.0.0
-`,
-	}
-	semv, err := Current()
-	if err != nil {
-		t.Fatalf("Error: %#v", err)
-	}
-	expected := "v12.345.67"
-	if expected != semv.String() {
-		t.Errorf("expected %s, but %s", expected, semv)
-	}
-}
+`
 
-func TestNewWhenTagNothing(t *testing.T) {
-	cmder = MockedCmd{
-		Out: `
-`,
+var empty = `
+`
+
+func TestCurrent(t *testing.T) {
+	tests := []struct {
+		out  string
+		want string
+	}{
+		{mixed, "v12.345.67"},
+		{empty, "v0.0.0"},
 	}
-	semv, err := Current()
-	if err != nil {
-		t.Fatalf("Error: %#v", err)
-	}
-	expected := "v0.0.0"
-	if expected != semv.String() {
-		t.Errorf("expected %s, but %s", expected, semv)
+
+	for i, tt := range tests {
+		cmder = MockedCmd{Out: tt.out}
+		v, err := Current()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if v.String() != tt.want {
+			t.Errorf("test[%d]: Semv(%#v) = %s; want %s", i, v, v, tt.want)
+		}
 	}
 }
 
 func TestString(t *testing.T) {
-	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, err := Current()
+	tests := []struct {
+		v    *Semv
+		want string
+	}{
+		{&Semv{}, "v0.0.0"},
+		{MustNew("1.0.0"), "v1.0.0"},
+	}
+
+	for i, tt := range tests {
+		if tt.v.String() != tt.want {
+			t.Errorf("test[%d]: Semv(%#v) = %s; want %s", i, tt.v, tt.v, tt.want)
+		}
+	}
+}
+
+func TestNext(t *testing.T) {
+	cmder = MockedCmd{Out: mixed}
+	v, err := Current()
 	if err != nil {
-		t.Fatalf("Error: %#v", err)
+		t.Fatal(err)
 	}
-	expected := "v2.3.4-rc.2"
 
-	if expected != semv.String() {
-		t.Errorf("expected %s, but %s", expected, semv)
+	tests := []struct {
+		target string
+		want   string
+	}{
+		{"major", "v13.0.0"},
+		{"minor", "v12.346.0"},
+		{"patch", "v12.345.68"},
 	}
-}
 
-func TestIncrementWhenNonPre(t *testing.T) {
-	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := Current()
-	semv.Next("major")
-	expected := "v3.0.0"
-
-	if expected != semv.String() {
-		t.Errorf("expected %s, but %s", expected, semv)
-	}
-}
-
-func TestIncrementWhenPre(t *testing.T) {
-	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := Current()
-	semv.Next("major").PreRelease("")
-	expected := "v3.0.0-rc.0"
-
-	if expected != semv.String() {
-		t.Errorf("expected %s, but %s", expected, semv)
-	}
-}
-
-func TestIncrementMajor(t *testing.T) {
-	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := Current()
-	semv.incrementMajor()
-	expected := "v3.0.0"
-
-	if expected != semv.String() {
-		t.Errorf("expected %s, but %s", expected, semv)
-	}
-}
-
-func TestIncrementMinor(t *testing.T) {
-	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := Current()
-	semv.incrementMinor()
-	expected := "v2.4.0"
-
-	if expected != semv.String() {
-		t.Errorf("expected %s, but %s", expected, semv)
-	}
-}
-
-func TestIncrementPatch(t *testing.T) {
-	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := Current()
-	semv.incrementPatch()
-	expected := "v2.3.5"
-
-	if expected != semv.String() {
-		t.Errorf("expected %s, but %s", expected, semv)
+	for i, tt := range tests {
+		vn := v.Next(tt.target)
+		if vn.String() != tt.want {
+			t.Errorf("test[%d]: Semv(%#v) = %s; want %s", i, vn, vn, tt.want)
+		}
 	}
 }
 
 func TestPreRelease(t *testing.T) {
-	cmder = MockedCmd{Out: `v2.3.4-rc.2`}
-	semv, _ := Current()
-	semv.PreRelease("")
-	expected := "v2.3.4-rc.3"
+	cmder = MockedCmd{Out: mixed}
+	v, err := Current()
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	if expected != semv.String() {
-		t.Errorf("expected %s, but %s", expected, semv)
+	tests := []struct {
+		preName string
+		want    string
+	}{
+		{"", "v13.0.0-rc.0"},
+		{"alpha", "v13.0.0-alpha.0"},
+		{"beta", "v13.0.0-beta.0"},
+	}
+
+	for i, tt := range tests {
+		vn := v.Next("major").PreRelease(tt.preName)
+		if vn.String() != tt.want {
+			t.Errorf("test[%d]: Semv(%#v) = %s; want %s", i, vn, vn, tt.want)
+		}
+	}
+}
+
+func TestIncrementMajor(t *testing.T) {
+	tests := []struct {
+		v    *Semv
+		want string
+	}{
+		{MustNew("1.0.0"), "v2.0.0"},
+		{MustNew("1.2.3"), "v2.0.0"},
+		{MustNew("0.0.0"), "v1.0.0"},
+	}
+
+	for i, tt := range tests {
+		tt.v.incrementMajor()
+		if tt.v.String() != tt.want {
+			t.Errorf("test[%d]: Semv(%#v) = %s; want %s", i, tt.v, tt.v, tt.want)
+		}
+	}
+}
+
+func TestIncrementMinor(t *testing.T) {
+	tests := []struct {
+		v    *Semv
+		want string
+	}{
+		{MustNew("1.0.0"), "v1.1.0"},
+		{MustNew("1.2.3"), "v1.3.0"},
+		{MustNew("0.0.0"), "v0.1.0"},
+	}
+
+	for i, tt := range tests {
+		tt.v.incrementMinor()
+		if tt.v.String() != tt.want {
+			t.Errorf("test[%d]: Semv(%#v) = %s; want %s", i, tt.v, tt.v, tt.want)
+		}
+	}
+}
+
+func TestIncrementPatch(t *testing.T) {
+	tests := []struct {
+		v    *Semv
+		want string
+	}{
+		{MustNew("1.0.0"), "v1.0.1"},
+		{MustNew("1.2.3"), "v1.2.4"},
+		{MustNew("0.0.0"), "v0.0.1"},
+	}
+
+	for i, tt := range tests {
+		tt.v.incrementPatch()
+		if tt.v.String() != tt.want {
+			t.Errorf("test[%d]: Semv(%#v) = %s; want %s", i, tt.v, tt.v, tt.want)
+		}
 	}
 }
