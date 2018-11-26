@@ -54,6 +54,16 @@ func NewPreReleaseList() (*List, error) {
 	return &List{data: list}, nil
 }
 
+// FindSame finds same one
+func (l *List) FindSame(v semver.Version) semver.Version {
+	for _, vv := range l.data {
+		if vv.Major == v.Major && vv.Minor == v.Minor && vv.Patch == v.Patch {
+			return vv
+		}
+	}
+	return semver.Version{}
+}
+
 // String to string
 func (l *List) String() string {
 	var ll []string
