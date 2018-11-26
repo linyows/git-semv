@@ -5,7 +5,7 @@ import (
 )
 
 var defaultPreVersion = "0"
-var defaultPreVersionPrefix = "rc"
+var defaultPreVersionPrefix = "alpha"
 var defaultTagPrefix = "v"
 
 // Semv struct
