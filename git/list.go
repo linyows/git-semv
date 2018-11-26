@@ -43,6 +43,17 @@ func NewStrictList() (*List, error) {
 	return &List{data: list}, nil
 }
 
+// NewPreReleaseList returns only pre-release
+func NewPreReleaseList() (*List, error) {
+	list, err := fetch(func(v semver.Version) bool {
+		return len(v.Pre) < 0
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &List{data: list}, nil
+}
+
 // String to string
 func (l *List) String() string {
 	var ll []string
