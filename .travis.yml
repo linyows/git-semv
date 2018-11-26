@@ -11,7 +11,10 @@ after_success:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: make dist
+    script:
+      - git reset --hard
+      - git clean -f
+      - make dist
     on:
       tags: true
       go: 1.11.x
