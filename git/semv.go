@@ -1,6 +1,8 @@
 package semv
 
 import (
+	"fmt"
+
 	"github.com/blang/semver"
 )
 
@@ -58,29 +60,45 @@ func (v *Semv) Next(target string) *Semv {
 }
 
 // PreRelease retuns
-func (v *Semv) PreRelease(name string) *Semv {
-	if len(v.data.Pre) > 0 {
-		notB := true
-		for i, pre := range v.data.Pre {
-			if pre.IsNumeric() {
-				v.data.Pre[i].VersionNum++
-				notB = false
-			}
-		}
-		if notB {
-			p, err := semver.NewPRVersion(defaultPreVersion)
-			if err == nil {
-				v.data.Pre = append(v.data.Pre, p)
-			}
-		}
-		return v
+func (v *Semv) PreRelease(name string) (*Semv, error) {
+	list, err := NewPreReleaseList()
+	if err != nil {
+		return nil, err
 	}
 
-	var prefix string
+	prefix := name
 	if name == "" {
 		prefix = defaultPreVersionPrefix
-	} else {
-		prefix = name
+	}
+
+	same := list.FindSame(v.data)
+	if same.String() != "0.0.0" {
+		v.data = same
+	}
+
+	if len(v.data.Pre) > 0 {
+		incremented := false
+		mustIncremnt := false
+
+		for i, pre := range v.data.Pre {
+			if pre.IsNumeric() && mustIncremnt && i < 3 {
+				v.data.Pre[i].VersionNum++
+				incremented = true
+			} else if pre.IsNumeric() == false && i == 0 {
+				if pre.VersionStr == prefix {
+					mustIncremnt = true
+				} else if pre.Compare(semver.PRVersion{VersionStr: prefix, IsNum: false}) == 1 {
+					return nil, fmt.Errorf("%s is less than %s", prefix, pre.VersionStr)
+				} else {
+					v.data.Pre[i].VersionStr = prefix
+					incremented = true
+				}
+			}
+		}
+
+		if incremented == true {
+			return v, nil
+		}
 	}
 
 	prV, err := semver.NewPRVersion(prefix)
@@ -92,7 +110,8 @@ func (v *Semv) PreRelease(name string) *Semv {
 	if err == nil {
 		v.data.Pre = append(v.data.Pre, prever)
 	}
-	return v
+
+	return v, nil
 }
 
 // Build retuns
