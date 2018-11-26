@@ -58,7 +58,7 @@ func (v *Semv) Next(target string) *Semv {
 }
 
 // PreRelease retuns
-func (v *Semv) PreRelease(name string) {
+func (v *Semv) PreRelease(name string) *Semv {
 	if len(v.data.Pre) > 0 {
 		notB := true
 		for i, pre := range v.data.Pre {
@@ -73,18 +73,26 @@ func (v *Semv) PreRelease(name string) {
 				v.data.Pre = append(v.data.Pre, p)
 			}
 		}
-		return
+		return v
 	}
 
-	prefix, err := semver.NewPRVersion(defaultPreVersionPrefix)
+	var prefix string
+	if name == "" {
+		prefix = defaultPreVersionPrefix
+	} else {
+		prefix = name
+	}
+
+	prV, err := semver.NewPRVersion(prefix)
 	if err == nil {
-		v.data.Pre = append(v.data.Pre, prefix)
+		v.data.Pre = append(v.data.Pre, prV)
 	}
 
 	prever, err := semver.NewPRVersion(defaultPreVersion)
 	if err == nil {
 		v.data.Pre = append(v.data.Pre, prever)
 	}
+	return v
 }
 
 // Build retuns
