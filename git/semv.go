@@ -16,6 +16,15 @@ type Semv struct {
 	buildName      string
 }
 
+// MustNew creates Semv
+func MustNew(s string) *Semv {
+	v, err := semver.ParseTolerant(s)
+	if err != nil {
+		panic(err)
+	}
+	return &Semv{data: v}
+}
+
 // Current returns current version
 func Current() (*Semv, error) {
 	list, err := NewStrictList()
