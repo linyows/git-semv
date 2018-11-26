@@ -1,6 +1,7 @@
 package semv
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/blang/semver"
@@ -9,6 +10,12 @@ import (
 var defaultPreVersion = "0"
 var defaultPreVersionPrefix = "alpha"
 var defaultTagPrefix = "v"
+
+// UsernameCmd for git
+var UsernameCmd = []string{"config", "user.name"}
+
+// LatestCommitCmd for git
+var LatestCommitCmd = []string{"describe", "--always"}
 
 // Semv struct
 type Semv struct {
@@ -115,7 +122,18 @@ func (v *Semv) PreRelease(name string) (*Semv, error) {
 }
 
 // Build retuns
-func (v *Semv) Build(name string) {
+func (v *Semv) Build(name string) (*Semv, error) {
+	if name == "" {
+		m, err := meta()
+		if err != nil {
+			return nil, err
+		}
+		v.data.Build = m
+	} else {
+		v.data.Build = []string{name}
+	}
+
+	return v, nil
 }
 
 func (v *Semv) incrementMajor() {
@@ -134,4 +152,44 @@ func (v *Semv) incrementMinor() {
 func (v *Semv) incrementPatch() {
 	v.data.Patch++
 	v.data.Pre = nil
+}
+
+func username() ([]byte, error) {
+	if cmder == nil {
+		cmder = Cmd{}
+	}
+
+	b, err := cmder.Do(git, UsernameCmd...)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes.TrimSpace(b), nil
+}
+
+func latestCommit() ([]byte, error) {
+	if cmder == nil {
+		cmder = Cmd{}
+	}
+
+	b, err := cmder.Do(git, LatestCommitCmd...)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes.TrimSpace(b), nil
+}
+
+func meta() ([]string, error) {
+	user, err := username()
+	if err != nil {
+		return nil, err
+	}
+
+	hash, err := latestCommit()
+	if err != nil {
+		return nil, err
+	}
+
+	return []string{string(hash), string(user)}, nil
 }
