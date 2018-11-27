@@ -49,7 +49,11 @@ func Latest() (*Semv, error) {
 
 // String to string
 func (v *Semv) String() string {
-	return defaultTagPrefix + v.data.String()
+	vv := defaultTagPrefix + v.data.String()
+	if vv == "v0.0.0" {
+		return ""
+	}
+	return vv
 }
 
 // Next returns next version
