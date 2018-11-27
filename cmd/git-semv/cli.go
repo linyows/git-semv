@@ -106,7 +106,7 @@ Usage: git-semv [--version] [--help] command <options>
 
 Commands:
   list               Sorted versions
-  now                Current version
+  now, latest        Latest version
   major              Next major version: vX.0.0
   minor              Next minor version: v0.X.0
   patch              Next patch version: v0.0.X
@@ -149,7 +149,7 @@ func (c *CLI) run(a []string) {
 
 	switch c.Command {
 	case "list":
-		list, err := semv.NewList()
+		list, err := semv.GetList()
 		if err != nil {
 			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
 		}
@@ -158,19 +158,19 @@ func (c *CLI) run(a []string) {
 		}
 		fmt.Fprintf(c.outStream, "%s\n", list)
 
-	case "now", "current":
-		current, err := semv.Current()
+	case "now", "latest":
+		latest, err := semv.Latest()
 		if err != nil {
 			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
 		}
-		fmt.Fprintf(c.outStream, "%s\n", current)
+		fmt.Fprintf(c.outStream, "%s\n", latest)
 
 	case "major", "minor", "patch":
-		current, err := semv.Current()
+		latest, err := semv.Latest()
 		if err != nil {
 			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
 		}
-		next := current.Next(c.Command)
+		next := latest.Next(c.Command)
 		if c.Pre {
 			next.PreRelease(c.PreName)
 		}

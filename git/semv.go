@@ -35,14 +35,14 @@ func MustNew(s string) *Semv {
 	return &Semv{data: v}
 }
 
-// Current returns current version
-func Current() (*Semv, error) {
-	list, err := NewList()
+// Latest returns latest version
+func Latest() (*Semv, error) {
+	list, err := GetList()
 	if err != nil {
 		return nil, err
 	}
 	return &Semv{
-		data: list.WithoutPreRelease().Current(),
+		data: list.WithoutPreRelease().Latest(),
 		list: list,
 	}, nil
 }

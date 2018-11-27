@@ -51,7 +51,7 @@ func TestCurrent(t *testing.T) {
 
 	for i, tt := range tests {
 		tagCmder = MockedCmd{Out: tt.out}
-		v, err := Current()
+		v, err := Latest()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -79,7 +79,7 @@ func TestString(t *testing.T) {
 
 func TestNext(t *testing.T) {
 	tagCmder = MockedCmd{Out: mixed}
-	v, err := Current()
+	v, err := Latest()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +103,7 @@ func TestNext(t *testing.T) {
 
 func TestPreRelease(t *testing.T) {
 	tagCmder = MockedCmd{Out: mixed}
-	v, err := Current()
+	v, err := Latest()
 	if err != nil {
 		t.Fatal(err)
 	}

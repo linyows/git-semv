@@ -18,8 +18,8 @@ type List struct {
 	data semver.Versions
 }
 
-// NewList returns List
-func NewList() (*List, error) {
+// GetList returns List
+func GetList() (*List, error) {
 	list, err := getVersions()
 	if err != nil {
 		return nil, err
@@ -46,8 +46,8 @@ func (l *List) String() string {
 	return strings.Join(ll, "\n")
 }
 
-// Current get current version from List
-func (l *List) Current() semver.Version {
+// Latest gets latest version from List
+func (l *List) Latest() semver.Version {
 	if len(l.data) > 0 {
 		return l.data[len(l.data)-1]
 	}
