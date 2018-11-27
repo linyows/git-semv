@@ -25,22 +25,46 @@ $ go get github.com/linyows/git-semv
 Usage
 --
 
-```sh
-$ git semv current
-v1.2.3
-$ git semv bump
-v1.2.4
-$ git semv --minor bump
-v1.3.0
-$ git semv --major bump
-v2.0.0
-$ git semv --major --pre bump
-v2.0.0-rc.0
-```
+Show list:
 
 ```sh
-$ VER=$(git semv bump)
-$ git tag $VER && git push origin $VER
+$ git semv list
+v1.2.1-alpha.0
+v1.2.0
+v1.2.0-rc.1
+v1.2.0-rc.0
+v1.2.0-beta.0+ba8a247.foobar
+v1.2.0-alpha.0+a2a784b.anonymous
+v1.1.0
+v1.0.1
+v1.0.0
+```
+
+Show latest version:
+
+```sh
+$ git semv now
+v1.2.0
+```
+
+Show next version:
+
+```sh
+# with pre-release option
+$ git semv patch --pre
+v1.2.1-alpha.1
+# specify pre-release name option
+$ git semv patch --pre-name beta
+v1.2.1-beta.0
+# next minor version
+$ git semv minor
+v1.3.0
+# with bump option
+$ git semv minor --bump
+git tag v1.3.0 && git push origin v1.3.0
+# next major version with build option
+$ git semv major --pre --build
+v2.0.0-alpha.0+9125b23.linyows
 ```
 
 Contribution
