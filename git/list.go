@@ -8,7 +8,7 @@ import (
 )
 
 // TagCmd for tag list
-var TagCmd = []string{"tag", "--list", "--sort=-v:refname"}
+var TagCmd = []string{"tag", "--list", "--sort=v:refname"}
 var git = "git"
 var tagCmder Cmder
 var defaultVersion = "0.0.0"
