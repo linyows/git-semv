@@ -101,6 +101,12 @@ func getVersions() (semver.Versions, error) {
 
 	var list semver.Versions
 	for _, v := range vv {
+		if defaultTagPrefix != "" {
+			trimmed := strings.TrimPrefix(v, defaultTagPrefix)
+			if trimmed == v {
+				continue
+			}
+		}
 		sv, err := semver.ParseTolerant(v)
 		if err != nil {
 			continue
