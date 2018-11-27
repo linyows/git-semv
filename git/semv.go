@@ -76,9 +76,9 @@ func (v *Semv) PreRelease(name string) (*Semv, error) {
 		prefix = defaultPreVersionPrefix
 	}
 
-	same := list.FindSame(v.data)
-	if same.String() != "0.0.0" {
-		v.data = same
+	similar := list.FindSimilar(v.data)
+	if similar.String() != "0.0.0" {
+		v.data = similar
 	}
 
 	if len(v.data.Pre) > 0 {

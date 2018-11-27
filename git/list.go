@@ -27,8 +27,8 @@ func GetList() (*List, error) {
 	return &List{data: list}, nil
 }
 
-// FindSame finds same one
-func (l *List) FindSame(v semver.Version) semver.Version {
+// FindSimilar finds similar one
+func (l *List) FindSimilar(v semver.Version) semver.Version {
 	for _, vv := range l.data {
 		if vv.Major == v.Major && vv.Minor == v.Minor && vv.Patch == v.Patch {
 			return semver.MustParse(vv.String())
