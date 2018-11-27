@@ -28,13 +28,13 @@ func GetList() (*List, error) {
 }
 
 // FindSimilar finds similar one
-func (l *List) FindSimilar(v semver.Version) semver.Version {
+func (l *List) FindSimilar(v semver.Version) *Semv {
 	for _, vv := range l.data {
 		if vv.Major == v.Major && vv.Minor == v.Minor && vv.Patch == v.Patch {
-			return semver.MustParse(vv.String())
+			return MustNew(vv.String())
 		}
 	}
-	return semver.Version{}
+	return &Semv{}
 }
 
 // String to string
