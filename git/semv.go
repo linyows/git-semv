@@ -56,6 +56,11 @@ func (v *Semv) String() string {
 	return vv
 }
 
+// IsEmpty checks empty
+func (v *Semv) IsEmpty() bool {
+	return v.String() == ""
+}
+
 // Next returns next version
 func (v *Semv) Next(target string) *Semv {
 	vv := *v
