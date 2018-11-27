@@ -46,7 +46,7 @@ func TestCurrent(t *testing.T) {
 		want string
 	}{
 		{mixed, "v12.345.67"},
-		{empty, "v0.0.0"},
+		{empty, ""},
 	}
 
 	for i, tt := range tests {
@@ -66,7 +66,7 @@ func TestString(t *testing.T) {
 		v    *Semv
 		want string
 	}{
-		{&Semv{}, "v0.0.0"},
+		{&Semv{}, ""},
 		{MustNew("1.0.0"), "v1.0.0"},
 	}
 
