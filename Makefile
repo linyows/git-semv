@@ -21,3 +21,7 @@ ci: deps test lint
 
 dist:
 	@test -z $(GITHUB_TOKEN) || goreleaser --rm-dist
+
+clean:
+	rm -rf coverage.txt
+	git checkout go.*
