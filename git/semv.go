@@ -41,19 +41,18 @@ func Latest() (*Semv, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Semv{
-		data: list.WithoutPreRelease().Latest(),
-		list: list,
-	}, nil
+	semv := list.WithoutPreRelease().Latest()
+	semv.list = list
+	return semv, nil
 }
 
 // String to string
 func (v *Semv) String() string {
-	vv := defaultTagPrefix + v.data.String()
-	if vv == "v0.0.0" {
+	vv := v.data.String()
+	if vv == defaultVersion {
 		return ""
 	}
-	return vv
+	return defaultTagPrefix + vv
 }
 
 // IsEmpty checks empty

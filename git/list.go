@@ -47,15 +47,11 @@ func (l *List) String() string {
 }
 
 // Latest gets latest version from List
-func (l *List) Latest() semver.Version {
-	if len(l.data) > 0 {
-		return l.data[len(l.data)-1]
+func (l *List) Latest() *Semv {
+	if l.data.Len() > 0 {
+		return &Semv{data: l.data[len(l.data)-1]}
 	}
-	v, err := semver.Parse(defaultVersion)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return &Semv{data: semver.MustParse(defaultVersion)}
 }
 
 // WithoutPreRelease excludes pre-release
