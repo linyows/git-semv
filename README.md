@@ -1,7 +1,7 @@
 git-semv
 ==
 
-git-semv help semantic versioning for git tag.
+git-semv is a [git][git] plugin for [Semantic Versioning][semver].
 
 [![travis](https://img.shields.io/travis/linyows/git-semv.svg?style=for-the-badge)][travis]
 [![release](http://img.shields.io/github/release/linyows/git-semv.svg?style=for-the-badge)][release]
@@ -14,13 +14,19 @@ git-semv help semantic versioning for git tag.
 [license]: https://github.com/linyows/git-semv/blob/master/LICENSE
 [godoc]: http://godoc.org/github.com/linyows/git-semv
 [codecov]: https://codecov.io/gh/linyows/git-semv
+[semver]: https://semver.org/
+[git]: https://git-scm.com/
 
 Installation
 --
 
+Install git-semv binary in the same standard locations in the filesystem.
+
 ```sh
 $ go get github.com/linyows/git-semv
 ```
+
+or download zip file from [releases][release].
 
 Usage
 --
