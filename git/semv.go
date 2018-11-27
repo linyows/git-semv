@@ -86,8 +86,8 @@ func (v *Semv) PreRelease(name string) (*Semv, error) {
 	}
 
 	similar := list.FindSimilar(v.data)
-	if similar.String() != "0.0.0" {
-		v.data = similar
+	if similar.IsEmpty() == false {
+		v.data = similar.data
 	}
 
 	if len(v.data.Pre) > 0 {
