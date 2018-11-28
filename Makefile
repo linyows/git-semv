@@ -20,7 +20,7 @@ lint:
 ci: deps test lint
 
 gitfetch:
-	git fetch
+	git fetch --tags
 
 major: build gitfetch
 	./git-semv major --bump
