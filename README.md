@@ -65,9 +65,9 @@ v1.2.1-beta.0
 # next minor version
 $ git semv minor
 v1.3.0
-# with bump option
+# with bump option (wrapped: git tag v1.3.0 && git push origin v1.3.0)
 $ git semv minor --bump
-git tag v1.3.0 && git push origin v1.3.0
+Bumped version to v1.3.0
 # next major version with build option
 $ git semv major --pre --build
 v2.0.0-alpha.0+9125b23.linyows
