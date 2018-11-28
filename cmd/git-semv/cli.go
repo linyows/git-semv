@@ -19,9 +19,6 @@ const (
 	ExitErr int = 1
 )
 
-// BumpCmd for git command
-var BumpCmd = "git tag %s && git push origin %s"
-
 // CLI struct
 type CLI struct {
 	outStream, errStream io.Writer
@@ -178,7 +175,17 @@ func (c *CLI) run(a []string) int {
 			next.Build(c.BuildName)
 		}
 		if c.Bump {
-			fmt.Fprintf(c.outStream, BumpCmd, next, next)
+			b, err := semv.Cmd{}.Do("git", "tag", next.String())
+			if err != nil {
+				fmt.Fprintf(c.errStream, "Error: %s\n", err)
+				return ExitErr
+			}
+			bb, err := semv.Cmd{}.Do("git", "push", "origin", next.String())
+			if err != nil {
+				fmt.Fprintf(c.errStream, "Error: %s\n", err)
+				return ExitErr
+			}
+			fmt.Fprintf(c.outStream, "Bumped version to %s\n", next)
 		} else {
 			fmt.Fprintf(c.outStream, "%s\n", next)
 		}
