@@ -37,7 +37,6 @@ Options:
 		wantE []byte
 		wantS int
 	}{
-		{[]string{}, []byte("\n"), []byte(""), ExitOK},
 		{[]string{"-h"}, []byte(help), []byte(""), ExitErr},
 		{[]string{"--help"}, []byte(help), []byte(""), ExitErr},
 		{[]string{"-v"}, []byte(""), []byte(ver), ExitOK},
