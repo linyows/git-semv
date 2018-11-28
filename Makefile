@@ -19,6 +19,18 @@ lint:
 
 ci: deps test lint
 
+gitfetch:
+	git fetch
+
+major: build gitfetch
+	eval `./git-semv major --bump`
+
+minor: build gitfetch
+	eval `./git-semv minor --bump`
+
+patch: build gitfetch
+	eval `./git-semv patch --bump`
+
 dist:
 	@test -z $(GITHUB_TOKEN) || goreleaser --rm-dist
 
