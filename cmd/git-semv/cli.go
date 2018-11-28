@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"os"
 	"reflect"
 	"strings"
 
@@ -117,24 +116,22 @@ Options:
 	fmt.Fprintf(c.outStream, help, opts)
 }
 
-func (c *CLI) run(a []string) {
+func (c *CLI) run(a []string) int {
 	p := flags.NewParser(c, flags.PrintErrors|flags.PassDoubleDash)
 	args, err := p.ParseArgs(a)
 	if err != nil {
 		fmt.Fprintf(c.errStream, "Error: %#v\n", err)
-		return
+		return ExitErr
 	}
 
 	if c.Help {
 		c.showHelp()
-		os.Exit(ExitErr)
-		return
+		return ExitErr
 	}
 
 	if c.Version {
 		fmt.Fprintf(c.errStream, "git-semv version %s [%v, %v]\n", version, commit, date)
-		os.Exit(ExitOK)
-		return
+		return ExitOK
 	}
 
 	if len(args) > 0 {
@@ -182,9 +179,8 @@ func (c *CLI) run(a []string) {
 	default:
 		fmt.Fprintf(c.errStream, "Error: command is not available\n")
 		c.showHelp()
-		os.Exit(ExitErr)
-		return
+		return ExitErr
 	}
 
-	os.Exit(ExitOK)
+	return ExitOK
 }

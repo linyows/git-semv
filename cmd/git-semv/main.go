@@ -16,5 +16,5 @@ func main() {
 		errStream: os.Stderr,
 		Prefix:    "v",
 	}
-	cli.run(os.Args[1:])
+	os.Exit(cli.run(os.Args[1:]))
 }
