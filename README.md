@@ -1,13 +1,13 @@
 git-semv
 ==
 
-git-semv is a [git][git] plugin for [Semantic Versioning][semver].
+Git-Semv is a [Git][git] plugin for [Semantic Versioning][semver].
 
 [![travis](https://img.shields.io/travis/linyows/git-semv.svg?style=for-the-badge)][travis]
-[![release](http://img.shields.io/github/release/linyows/git-semv.svg?style=for-the-badge)][release]
-[![license](http://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)][license]
-[![godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=for-the-badge)][godoc]
 [![codecov](https://img.shields.io/codecov/c/github/linyows/git-semv.svg?style=for-the-badge)][codecov]
+[![release](http://img.shields.io/github/release/linyows/git-semv.svg?style=for-the-badge)][release]
+[![godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=for-the-badge)][godoc]
+[![license](http://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)][license]
 
 [travis]: https://travis-ci.org/linyows/git-semv
 [release]: https://github.com/linyows/git-semv/releases
@@ -23,7 +23,7 @@ Installation
 Install git-semv binary in the same standard locations in the filesystem.
 
 ```sh
-$ go get github.com/linyows/git-semv
+$ go get github.com/linyows/git-semv/cmd/git-semv
 ```
 
 or download zip file from [releases][release].
