@@ -86,7 +86,7 @@ func (v *Semv) PreRelease(name string) (*Semv, error) {
 
 	similar := list.FindSimilar(v.data)
 	if similar.IsEmpty() == false {
-		v.data = similar.data
+		v.cloneForPreRelease(similar)
 	}
 
 	if len(v.data.Pre) > 0 {
@@ -140,6 +140,12 @@ func (v *Semv) Build(name string) (*Semv, error) {
 	}
 
 	return v, nil
+}
+
+func (v *Semv) cloneForPreRelease(vv *Semv) *Semv {
+	v.data = vv.data
+	v.data.Build = []string{}
+	return v
 }
 
 func (v *Semv) incrementMajor() {
