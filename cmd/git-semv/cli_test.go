@@ -28,7 +28,8 @@ Options:
   -h, --help         Show this help message and exit
   -v, --version      Prints the version number
 `
-	unknown := `Error: command is not available
+	unknownFlag := "Error: unknown flag `unknown'\n"
+	unknownCmd := `Error: command is not available
 `
 
 	tests := []struct {
@@ -41,7 +42,8 @@ Options:
 		{[]string{"--help"}, []byte(help), []byte(""), ExitErr},
 		{[]string{"-v"}, []byte(""), []byte(ver), ExitOK},
 		{[]string{"--version"}, []byte(""), []byte(ver), ExitOK},
-		{[]string{"unknown"}, []byte(help), []byte(unknown), ExitErr},
+		{[]string{"--unknown=abc"}, []byte(""), []byte(unknownFlag), ExitErr},
+		{[]string{"unknown"}, []byte(help), []byte(unknownCmd), ExitErr},
 	}
 
 	for i, tt := range tests {
