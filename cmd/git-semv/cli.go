@@ -120,7 +120,7 @@ func (c *CLI) run(a []string) int {
 	p := flags.NewParser(c, flags.PassDoubleDash)
 	args, err := p.ParseArgs(a)
 	if err != nil {
-		fmt.Fprintf(c.errStream, "Error: %#v\n", err)
+		fmt.Fprintf(c.errStream, "Error: %s\n", err)
 		return ExitErr
 	}
 
