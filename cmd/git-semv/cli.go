@@ -148,7 +148,7 @@ func (c *CLI) run(a []string) int {
 	case "list":
 		list, err := semv.GetList()
 		if err != nil {
-			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
+			fmt.Fprintf(c.errStream, "Error: %s\n", err)
 		}
 		if c.All == false {
 			list = list.WithoutPreRelease()
@@ -158,14 +158,14 @@ func (c *CLI) run(a []string) int {
 	case "now", "latest":
 		latest, err := semv.Latest()
 		if err != nil {
-			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
+			fmt.Fprintf(c.errStream, "Error: %s\n", err)
 		}
 		fmt.Fprintf(c.outStream, "%s\n", latest)
 
 	case "major", "minor", "patch":
 		latest, err := semv.Latest()
 		if err != nil {
-			fmt.Fprintf(c.errStream, "Error: %#v\n", err)
+			fmt.Fprintf(c.errStream, "Error: %s\n", err)
 		}
 		next := latest.Next(c.Command)
 		if c.Pre {
