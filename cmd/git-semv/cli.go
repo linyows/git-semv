@@ -19,6 +19,9 @@ const (
 	ExitErr int = 1
 )
 
+// BumpCmd for git command
+var BumpCmd = "git tag %s && git push origin %s"
+
 // CLI struct
 type CLI struct {
 	outStream, errStream io.Writer
@@ -34,8 +37,6 @@ type CLI struct {
 	Help                 bool   `long:"help" short:"h" description:"Show this help message and exit"`
 	Version              bool   `long:"version" short:"v" description:"Prints the version number"`
 }
-
-var BumpCmd = "git tag %s && git push origin %s"
 
 func (c *CLI) buildHelp(names []string) []string {
 	var help []string
