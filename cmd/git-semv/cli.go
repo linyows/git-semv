@@ -168,10 +168,10 @@ func (c *CLI) run(a []string) int {
 			fmt.Fprintf(c.errStream, "Error: %s\n", err)
 		}
 		next := latest.Next(c.Command)
-		if c.Pre {
+		if c.Pre || c.PreName != "" {
 			next.PreRelease(c.PreName)
 		}
-		if c.Build {
+		if c.Build || c.BuildName != "" {
 			next.Build(c.BuildName)
 		}
 		if c.Bump {
