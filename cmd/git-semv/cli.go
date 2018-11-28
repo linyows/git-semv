@@ -175,12 +175,12 @@ func (c *CLI) run(a []string) int {
 			next.Build(c.BuildName)
 		}
 		if c.Bump {
-			b, err := semv.Cmd{}.Do("git", "tag", next.String())
+			_, err = semv.Cmd{}.Do("git", "tag", next.String())
 			if err != nil {
 				fmt.Fprintf(c.errStream, "Error: %s\n", err)
 				return ExitErr
 			}
-			bb, err := semv.Cmd{}.Do("git", "push", "origin", next.String())
+			_, err = semv.Cmd{}.Do("git", "push", "origin", next.String())
 			if err != nil {
 				fmt.Fprintf(c.errStream, "Error: %s\n", err)
 				return ExitErr
