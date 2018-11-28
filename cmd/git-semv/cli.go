@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	flags "github.com/jessevdk/go-flags"
-	semv "github.com/linyows/git-semv/git"
+	semv "github.com/linyows/git-semv"
 )
 
 const (
