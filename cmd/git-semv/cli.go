@@ -35,6 +35,8 @@ type CLI struct {
 	Version              bool   `long:"version" short:"v" description:"Prints the version number"`
 }
 
+var BumpCmd = "git tag %s && git push origin %s"
+
 func (c *CLI) buildHelp(names []string) []string {
 	var help []string
 	t := reflect.TypeOf(CLI{})
@@ -174,7 +176,11 @@ func (c *CLI) run(a []string) int {
 		if c.Build {
 			next.Build(c.BuildName)
 		}
-		fmt.Fprintf(c.outStream, "%s\n", next)
+		if c.Bump {
+			fmt.Fprintf(c.outStream, BumpCmd, next, next)
+		} else {
+			fmt.Fprintf(c.outStream, "%s\n", next)
+		}
 
 	default:
 		fmt.Fprintf(c.errStream, "Error: command is not available\n")
