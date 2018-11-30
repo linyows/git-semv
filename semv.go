@@ -20,10 +20,8 @@ var defaultTagPrefix = "v"
 
 // Semv struct
 type Semv struct {
-	data           semver.Version
-	list           *List
-	preReleaseName string
-	buildName      string
+	data semver.Version
+	list *List
 }
 
 // MustNew creates Semv
