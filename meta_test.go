@@ -6,40 +6,76 @@ import (
 )
 
 func TestUsername(t *testing.T) {
-	w := "foobar"
-	usernameCmder = MockedCmd{Out: w + "\n"}
-	u, err := username()
-	if err != nil {
-		t.Fatalf("Error: %#v", err)
+	tests := []struct {
+		out  string
+		err  string
+		want string
+	}{
+		{"foobar\n", "", "foobar"},
+		{"", "failed", ""},
 	}
-	if w != string(u) {
-		t.Errorf("username = %s, want %s", u, w)
+
+	for i, tt := range tests {
+		usernameCmder = MockedCmd{Out: tt.out, Err: tt.err}
+		u, err := username()
+
+		if (tt.err == "" && err != nil) || (tt.err != "" && err.Error() != tt.err) {
+			t.Errorf("test[%d]: err = %s; want %s", i, err, tt.err)
+		}
+
+		if tt.want != string(u) {
+			t.Errorf("test[%d]: username = %s; want %s", i, u, tt.want)
+		}
 	}
 }
 
 func TestLatestCommit(t *testing.T) {
-	w := "2f994ff"
-	latestCommitCmder = MockedCmd{Out: w + "\n"}
-	h, err := latestCommit()
-	if err != nil {
-		t.Fatalf("Error: %#v", err)
+	tests := []struct {
+		out  string
+		err  string
+		want string
+	}{
+		{"2f994ff\n", "", "2f994ff"},
+		{"", "failed", ""},
 	}
-	if w != string(h) {
-		t.Errorf("hash = %s, want %s", h, w)
+
+	for i, tt := range tests {
+		latestCommitCmder = MockedCmd{Out: tt.out, Err: tt.err}
+		h, err := latestCommit()
+		if (tt.err == "" && err != nil) || (tt.err != "" && err.Error() != tt.err) {
+			t.Errorf("test[%d]: err = %s; want %s", i, err, tt.err)
+		}
+
+		if tt.want != string(h) {
+			t.Errorf("test[%d]: hash = %s; want %s", i, h, tt.want)
+		}
 	}
 }
 
 func TestMeta(t *testing.T) {
-	u := "foobar"
-	h := "2f994ff"
-	usernameCmder = MockedCmd{Out: u + "\n"}
-	latestCommitCmder = MockedCmd{Out: h + "\n"}
-	m, err := meta()
-	if err != nil {
-		t.Fatalf("Error: %#v", err)
+	tests := []struct {
+		out1 string
+		err1 string
+		out2 string
+		err2 string
+		want []string
+	}{
+		{"foobar\n", "", "2f994ff\n", "", []string{"2f994ff", "foobar"}},
+		{"foobar\n", "", "", "failed", nil},
+		{"", "failed", "2f994ff\n", "", nil},
 	}
-	w := []string{h, u}
-	if !reflect.DeepEqual(w, m) {
-		t.Errorf("meta = %s, want %s", m, w)
+	for i, tt := range tests {
+		usernameCmder = MockedCmd{Out: tt.out1, Err: tt.err1}
+		latestCommitCmder = MockedCmd{Out: tt.out2, Err: tt.err2}
+		m, err := meta()
+		if (tt.err1 != "" || tt.err2 != "") && err == nil {
+			t.Errorf("test[%d]: err = nil; want %s", i, tt.err1+tt.err2)
+		}
+		if tt.err1 == "" && tt.err2 == "" && err != nil {
+			t.Errorf("test[%d]: err = %s; want no error", i, err)
+		}
+		if !reflect.DeepEqual(tt.want, m) {
+			t.Errorf("test[%d]: meta = %s; want %s", i, m, tt.want)
+		}
 	}
 }
