@@ -23,6 +23,8 @@ This `git-semv` is a CLI tool for solving these problems and functions as git su
 [semver]: https://semver.org/
 [git]: https://git-scm.com/
 
+Japanese: https://tomohisaoda.com/posts/2018/do-semantic-versioning-for-app.html
+
 Installation
 --
 
