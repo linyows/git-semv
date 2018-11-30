@@ -132,6 +132,42 @@ func TestPreRelease(t *testing.T) {
 	}
 }
 
+func TestBuild(t *testing.T) {
+	tagCmder = MockedCmd{Out: mixed}
+	v, err := Latest()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	u := "foobar"
+	h := "2f994ff"
+	usernameCmder = MockedCmd{Out: u + "\n"}
+	latestCommitCmder = MockedCmd{Out: h + "\n"}
+
+	tests := []struct {
+		target    string
+		buildName string
+		want      string
+	}{
+		{"major", "", "v13.0.0+" + h + "." + u},
+		{"major", "foo", "v13.0.0+foo"},
+		{"minor", "", "v12.346.0+" + h + "." + u},
+		{"minor", "bar", "v12.346.0+bar"},
+		{"patch", "", "v12.345.68+" + h + "." + u},
+		{"patch", "foo-bar", "v12.345.68+foo-bar"},
+	}
+
+	for i, tt := range tests {
+		vn, err := v.Next(tt.target).Build(tt.buildName)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if vn.String() != tt.want {
+			t.Errorf("test[%d]: target = %s; name = %s; Semv = %s; want %s", i, tt.target, tt.buildName, vn, tt.want)
+		}
+	}
+}
+
 func TestIncrementMajor(t *testing.T) {
 	tests := []struct {
 		v    *Semv
