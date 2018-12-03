@@ -1,4 +1,4 @@
-package main
+package semv
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	flags "github.com/jessevdk/go-flags"
-	semv "github.com/linyows/git-semv"
 )
 
 const (
@@ -33,6 +32,11 @@ type CLI struct {
 	Prefix               string `long:"prefix" short:"x" description:"Prefix for version and tag(default: v)"`
 	Help                 bool   `long:"help" short:"h" description:"Show this help message and exit"`
 	Version              bool   `long:"version" short:"v" description:"Prints the version number"`
+}
+
+// RunCLI runs for CLI
+func RunCLI(o, e io.Writer, a []string) int {
+	return (&CLI{outStream: o, errStream: e}).run(a)
 }
 
 func (c *CLI) buildHelp(names []string) []string {
@@ -146,7 +150,7 @@ func (c *CLI) run(a []string) int {
 
 	switch c.Command {
 	case "list":
-		list, err := semv.GetList()
+		list, err := GetList()
 		if err != nil {
 			fmt.Fprintf(c.errStream, "Error: %s\n", err)
 		}
@@ -156,14 +160,14 @@ func (c *CLI) run(a []string) int {
 		fmt.Fprintf(c.outStream, "%s\n", list)
 
 	case "now", "latest":
-		latest, err := semv.Latest()
+		latest, err := Latest()
 		if err != nil {
 			fmt.Fprintf(c.errStream, "Error: %s\n", err)
 		}
 		fmt.Fprintf(c.outStream, "%s\n", latest)
 
 	case "major", "minor", "patch":
-		latest, err := semv.Latest()
+		latest, err := Latest()
 		if err != nil {
 			fmt.Fprintf(c.errStream, "Error: %s\n", err)
 		}
@@ -175,12 +179,12 @@ func (c *CLI) run(a []string) int {
 			next.Build(c.BuildName)
 		}
 		if c.Bump {
-			_, err = semv.Cmd{}.Do("git", "tag", next.String())
+			_, err = Cmd{}.Do("git", "tag", next.String())
 			if err != nil {
 				fmt.Fprintf(c.errStream, "Error: %s\n", err)
 				return ExitErr
 			}
-			_, err = semv.Cmd{}.Do("git", "push", "origin", next.String())
+			_, err = Cmd{}.Do("git", "push", "origin", next.String())
 			if err != nil {
 				fmt.Fprintf(c.errStream, "Error: %s\n", err)
 				return ExitErr
