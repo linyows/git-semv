@@ -119,3 +119,19 @@ v13.0.0-alpha.0
 		}
 	}
 }
+
+func TestRunCLI(t *testing.T) {
+	ver := "git-semv version dev [none, unknown]\n"
+	out, err := new(bytes.Buffer), new(bytes.Buffer)
+	args := []string{"-v"}
+	status := RunCLI(out, err, args)
+	if status != 0 {
+		t.Errorf("exit status = %d; want 0", status)
+	}
+	if bytes.Compare([]byte(""), out.Bytes()) != 0 {
+		t.Errorf("output = %s; want empty", out)
+	}
+	if bytes.Compare([]byte(ver), err.Bytes()) != 0 {
+		t.Errorf("err = %v; want %s", err, ver)
+	}
+}
