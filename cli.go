@@ -1,7 +1,6 @@
 package semv
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"reflect"
@@ -68,26 +67,6 @@ func (c *CLI) buildHelp(names []string) []string {
 		}
 
 		desc := tag.Get("description")
-		if i := strings.Index(desc, "\n"); i >= 0 {
-			var buf bytes.Buffer
-			buf.WriteString(desc[:i+1])
-			desc = desc[i+1:]
-			const indent = "                        "
-			for {
-				if i = strings.Index(desc, "\n"); i >= 0 {
-					buf.WriteString(indent)
-					buf.WriteString(desc[:i+1])
-					desc = desc[i+1:]
-					continue
-				}
-				break
-			}
-			if len(desc) > 0 {
-				buf.WriteString(indent)
-				buf.WriteString(desc)
-			}
-			desc = buf.String()
-		}
 		help = append(help, fmt.Sprintf("  %-18s %s", o, desc))
 	}
 
