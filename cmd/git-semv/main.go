@@ -2,18 +2,10 @@ package main
 
 import (
 	"os"
-)
 
-var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
+	semv "github.com/linyows/git-semv"
 )
 
 func main() {
-	cli := &CLI{
-		outStream: os.Stdout,
-		errStream: os.Stderr,
-	}
-	os.Exit(cli.run(os.Args[1:]))
+	os.Exit(semv.RunCLI(os.Stdout, os.Stderr, os.Args[1:]))
 }
