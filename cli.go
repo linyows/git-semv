@@ -34,6 +34,9 @@ type CLI struct {
 	Version              bool   `long:"version" short:"v" description:"Prints the version number"`
 }
 
+var gitTagCmder Cmder
+var gitPushTagCmder Cmder
+
 // RunCLI runs for CLI
 func RunCLI(o, e io.Writer, a []string) int {
 	return (&CLI{outStream: o, errStream: e}).run(a)
@@ -179,12 +182,18 @@ func (c *CLI) run(a []string) int {
 			next.Build(c.BuildName)
 		}
 		if c.Bump {
-			_, err = Cmd{}.Do("git", "tag", next.String())
+			if gitTagCmder == nil {
+				gitTagCmder = Cmd{}
+			}
+			_, err = gitTagCmder.Do("git", "tag", next.String())
 			if err != nil {
 				fmt.Fprintf(c.errStream, "Error: %s\n", err)
 				return ExitErr
 			}
-			_, err = Cmd{}.Do("git", "push", "origin", next.String())
+			if gitPushTagCmder == nil {
+				gitPushTagCmder = Cmd{}
+			}
+			_, err = gitPushTagCmder.Do("git", "push", "origin", next.String())
 			if err != nil {
 				fmt.Fprintf(c.errStream, "Error: %s\n", err)
 				return ExitErr

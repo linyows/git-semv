@@ -87,6 +87,8 @@ v13.0.0-alpha.0
 		{[]string{"minor", "--build"}, []byte("v12.346.0+2f994ff.foobar\n"), []byte(""), ExitOK},
 		{[]string{"patch", "--build"}, []byte("v12.345.68+2f994ff.foobar\n"), []byte(""), ExitOK},
 		{[]string{"major", "--build-name", "baz"}, []byte("v13.0.0+baz\n"), []byte(""), ExitOK},
+		// bump
+		{[]string{"major", "--bump"}, []byte("Bumped version to v13.0.0\n"), []byte(""), ExitOK},
 		// options
 		{[]string{"-h"}, []byte(help), []byte(""), ExitErr},
 		{[]string{"--help"}, []byte(help), []byte(""), ExitErr},
@@ -100,6 +102,8 @@ v13.0.0-alpha.0
 	tagCmder = MockedCmd{Out: mixed}
 	usernameCmder = MockedCmd{Out: "foobar\n", Err: ""}
 	latestCommitCmder = MockedCmd{Out: "2f994ff\n", Err: ""}
+	gitTagCmder = MockedCmd{Out: "", Err: ""}
+	gitPushTagCmder = MockedCmd{Out: "", Err: ""}
 
 	for i, tt := range tests {
 		out, err := new(bytes.Buffer), new(bytes.Buffer)
