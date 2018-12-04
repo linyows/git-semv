@@ -108,7 +108,7 @@ v13.0.0-alpha.0
 	for i, tt := range tests {
 		out, err := new(bytes.Buffer), new(bytes.Buffer)
 		env := Env{Out: out, Err: err, Args: tt.cmd, Version: "dev", Commit: "none", Date: "unknown"}
-		cli := &CLI{env: env}
+		cli := &cli{env: env}
 		status := cli.run()
 
 		if status != tt.wantS {

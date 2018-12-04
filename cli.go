@@ -17,11 +17,18 @@ const (
 	ExitErr int = 1
 )
 
-// CLI struct
-type CLI struct {
+// Env struct
+type Env struct {
+	Out, Err io.Writer
+	Args     []string
+	Version  string
+	Commit   string
+	Date     string
+}
+
+type cli struct {
 	env       Env
-	Command   string
-	Args      []string
+	command   string
 	Pre       bool   `long:"pre" short:"p" description:"Pre-Release version indicates(ex: 0.0.1-rc.0)"`
 	PreName   string `long:"pre-name" description:"Specify pre-release version name"`
 	Build     bool   `long:"build" short:"b" description:"Build version indicates(ex: 0.0.1+3222d31.foo)"`
@@ -33,26 +40,17 @@ type CLI struct {
 	Version   bool   `long:"version" short:"v" description:"Prints the version number"`
 }
 
-// Env struct
-type Env struct {
-	Out, Err io.Writer
-	Args     []string
-	Version  string
-	Commit   string
-	Date     string
-}
-
 var gitTagCmder Cmder
 var gitPushTagCmder Cmder
 
 // RunCLI runs for CLI
 func RunCLI(env Env) int {
-	return (&CLI{env: env}).run()
+	return (&cli{env: env}).run()
 }
 
-func (c *CLI) buildHelp(names []string) []string {
+func (c *cli) buildHelp(names []string) []string {
 	var help []string
-	t := reflect.TypeOf(CLI{})
+	t := reflect.TypeOf(cli{})
 
 	for _, name := range names {
 		f, ok := t.FieldByName(name)
@@ -82,7 +80,7 @@ func (c *CLI) buildHelp(names []string) []string {
 	return help
 }
 
-func (c *CLI) showHelp() {
+func (c *cli) showHelp() {
 	opts := strings.Join(c.buildHelp([]string{
 		"Pre",
 		"PreRelease",
@@ -111,9 +109,9 @@ Options:
 	fmt.Fprintf(c.env.Out, help, opts)
 }
 
-func (c *CLI) run() int {
+func (c *cli) run() int {
 	p := flags.NewParser(c, flags.PassDoubleDash)
-	args, err := p.ParseArgs(c.env.Args)
+	args, err := p.ParseArgs(c.env.Args[1:])
 	if err != nil {
 		fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		return ExitErr
@@ -130,16 +128,12 @@ func (c *CLI) run() int {
 	}
 
 	if len(args) > 0 {
-		c.Command = args[0]
+		c.command = args[0]
 	} else {
-		c.Command = "list"
+		c.command = "list"
 	}
 
-	if len(args) > 1 {
-		c.Args = args[1:]
-	}
-
-	switch c.Command {
+	switch c.command {
 	case "list":
 		list, err := GetList()
 		if err != nil {
@@ -162,7 +156,7 @@ func (c *CLI) run() int {
 		if err != nil {
 			fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		}
-		next := latest.Next(c.Command)
+		next := latest.Next(c.command)
 		if c.Pre || c.PreName != "" {
 			next.PreRelease(c.PreName)
 		}
@@ -192,7 +186,7 @@ func (c *CLI) run() int {
 		}
 
 	default:
-		fmt.Fprintf(c.env.Err, "Error: command is not available\n")
+		fmt.Fprintf(c.env.Err, "Error: command is not available: %s\n", c.command)
 		c.showHelp()
 		return ExitErr
 	}
