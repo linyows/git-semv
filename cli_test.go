@@ -29,7 +29,7 @@ Options:
   -v, --version      Prints the version number
 `
 	unknownFlag := "Error: unknown flag `unknown'\n"
-	unknownCmd := `Error: command is not available
+	unknownCmd := `Error: command is not available: unknown
 `
 
 	semvers := `v8.8.8
