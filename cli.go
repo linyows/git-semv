@@ -111,7 +111,7 @@ Options:
 
 func (c *cli) run() int {
 	p := flags.NewParser(c, flags.PassDoubleDash)
-	args, err := p.ParseArgs(c.env.Args[1:])
+	args, err := p.ParseArgs(c.env.Args)
 	if err != nil {
 		fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		return ExitErr
