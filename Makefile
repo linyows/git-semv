@@ -17,21 +17,10 @@ lint:
 	golint -set_exit_status $(TEST)
 
 ci: deps test lint
-
-gitfetch:
-	git fetch --tags
-
-major: build gitfetch
-	./git-semv major --bump
-
-minor: build gitfetch
-	./git-semv minor --bump
-
-patch: build gitfetch
-	./git-semv patch --bump
+	go mod tidy
 
 dist:
-	@test -z $(GITHUB_TOKEN) || goreleaser --rm-dist
+	@test -z $(GITHUB_TOKEN) || goreleaser
 
 clean:
 	rm -rf coverage.txt
