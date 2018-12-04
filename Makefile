@@ -4,7 +4,6 @@ default: build
 
 deps:
 	go get golang.org/x/lint/golint
-	go get github.com/pierrre/gotestcover
 	go get github.com/goreleaser/goreleaser
 
 build:
