@@ -107,8 +107,9 @@ v13.0.0-alpha.0
 
 	for i, tt := range tests {
 		out, err := new(bytes.Buffer), new(bytes.Buffer)
-		cli := &CLI{outStream: out, errStream: err}
-		status := cli.run(tt.cmd)
+		env := Env{Out: out, Err: err, Args: tt.cmd, Version: "dev", Commit: "none", Date: "unknown"}
+		cli := &CLI{env: env}
+		status := cli.run()
 
 		if status != tt.wantS {
 			t.Errorf("test[%d]: status = %d; want %d", i, status, tt.wantS)
@@ -128,7 +129,8 @@ func TestRunCLI(t *testing.T) {
 	ver := "git-semv version dev [none, unknown]\n"
 	out, err := new(bytes.Buffer), new(bytes.Buffer)
 	args := []string{"-v"}
-	status := RunCLI(out, err, args)
+	env := Env{Out: out, Err: err, Args: args, Version: "dev", Commit: "none", Date: "unknown"}
+	status := RunCLI(env)
 	if status != 0 {
 		t.Errorf("exit status = %d; want 0", status)
 	}

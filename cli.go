@@ -19,26 +19,35 @@ const (
 
 // CLI struct
 type CLI struct {
-	outStream, errStream io.Writer
-	Command              string
-	Args                 []string
-	Pre                  bool   `long:"pre" short:"p" description:"Pre-Release version indicates(ex: 0.0.1-rc.0)"`
-	PreName              string `long:"pre-name" description:"Specify pre-release version name"`
-	Build                bool   `long:"build" short:"b" description:"Build version indicates(ex: 0.0.1+3222d31.foo)"`
-	BuildName            string `long:"build-name" description:"Specify build version name"`
-	All                  bool   `long:"all" short:"a" description:"Include everything such as pre-release and build versions in list"`
-	Bump                 bool   `long:"bump" short:"B" description:"Create tag and Push to origin"`
-	Prefix               string `long:"prefix" short:"x" description:"Prefix for version and tag(default: v)"`
-	Help                 bool   `long:"help" short:"h" description:"Show this help message and exit"`
-	Version              bool   `long:"version" short:"v" description:"Prints the version number"`
+	env       Env
+	Command   string
+	Args      []string
+	Pre       bool   `long:"pre" short:"p" description:"Pre-Release version indicates(ex: 0.0.1-rc.0)"`
+	PreName   string `long:"pre-name" description:"Specify pre-release version name"`
+	Build     bool   `long:"build" short:"b" description:"Build version indicates(ex: 0.0.1+3222d31.foo)"`
+	BuildName string `long:"build-name" description:"Specify build version name"`
+	All       bool   `long:"all" short:"a" description:"Include everything such as pre-release and build versions in list"`
+	Bump      bool   `long:"bump" short:"B" description:"Create tag and Push to origin"`
+	Prefix    string `long:"prefix" short:"x" description:"Prefix for version and tag(default: v)"`
+	Help      bool   `long:"help" short:"h" description:"Show this help message and exit"`
+	Version   bool   `long:"version" short:"v" description:"Prints the version number"`
+}
+
+// Env struct
+type Env struct {
+	Out, Err io.Writer
+	Args     []string
+	Version  string
+	Commit   string
+	Date     string
 }
 
 var gitTagCmder Cmder
 var gitPushTagCmder Cmder
 
 // RunCLI runs for CLI
-func RunCLI(o, e io.Writer, a []string) int {
-	return (&CLI{outStream: o, errStream: e}).run(a)
+func RunCLI(env Env) int {
+	return (&CLI{env: env}).run()
 }
 
 func (c *CLI) buildHelp(names []string) []string {
@@ -99,14 +108,14 @@ Commands:
 Options:
 %s
 `
-	fmt.Fprintf(c.outStream, help, opts)
+	fmt.Fprintf(c.env.Out, help, opts)
 }
 
-func (c *CLI) run(a []string) int {
+func (c *CLI) run() int {
 	p := flags.NewParser(c, flags.PassDoubleDash)
-	args, err := p.ParseArgs(a)
+	args, err := p.ParseArgs(c.env.Args)
 	if err != nil {
-		fmt.Fprintf(c.errStream, "Error: %s\n", err)
+		fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		return ExitErr
 	}
 
@@ -116,7 +125,7 @@ func (c *CLI) run(a []string) int {
 	}
 
 	if c.Version {
-		fmt.Fprintf(c.errStream, "git-semv version %s [%v, %v]\n", version, commit, date)
+		fmt.Fprintf(c.env.Err, "git-semv version %s [%v, %v]\n", c.env.Version, c.env.Commit, c.env.Date)
 		return ExitOK
 	}
 
@@ -134,24 +143,24 @@ func (c *CLI) run(a []string) int {
 	case "list":
 		list, err := GetList()
 		if err != nil {
-			fmt.Fprintf(c.errStream, "Error: %s\n", err)
+			fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		}
 		if c.All == false {
 			list = list.WithoutPreRelease()
 		}
-		fmt.Fprintf(c.outStream, "%s\n", list)
+		fmt.Fprintf(c.env.Out, "%s\n", list)
 
 	case "now", "latest":
 		latest, err := Latest()
 		if err != nil {
-			fmt.Fprintf(c.errStream, "Error: %s\n", err)
+			fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		}
-		fmt.Fprintf(c.outStream, "%s\n", latest)
+		fmt.Fprintf(c.env.Out, "%s\n", latest)
 
 	case "major", "minor", "patch":
 		latest, err := Latest()
 		if err != nil {
-			fmt.Fprintf(c.errStream, "Error: %s\n", err)
+			fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		}
 		next := latest.Next(c.Command)
 		if c.Pre || c.PreName != "" {
@@ -166,7 +175,7 @@ func (c *CLI) run(a []string) int {
 			}
 			_, err = gitTagCmder.Do("git", "tag", next.String())
 			if err != nil {
-				fmt.Fprintf(c.errStream, "Error: %s\n", err)
+				fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 				return ExitErr
 			}
 			if gitPushTagCmder == nil {
@@ -174,16 +183,16 @@ func (c *CLI) run(a []string) int {
 			}
 			_, err = gitPushTagCmder.Do("git", "push", "origin", next.String())
 			if err != nil {
-				fmt.Fprintf(c.errStream, "Error: %s\n", err)
+				fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 				return ExitErr
 			}
-			fmt.Fprintf(c.outStream, "Bumped version to %s\n", next)
+			fmt.Fprintf(c.env.Out, "Bumped version to %s\n", next)
 		} else {
-			fmt.Fprintf(c.outStream, "%s\n", next)
+			fmt.Fprintf(c.env.Out, "%s\n", next)
 		}
 
 	default:
-		fmt.Fprintf(c.errStream, "Error: command is not available\n")
+		fmt.Fprintf(c.env.Err, "Error: command is not available\n")
 		c.showHelp()
 		return ExitErr
 	}
