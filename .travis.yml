@@ -4,6 +4,10 @@ go:
   - master
 env:
   - GO111MODULE=on
+before_script:
+  - rm -rf go.sum
+  - go mod download
+  - git diff go.*
 script:
   - make ci
 after_success:
