@@ -25,3 +25,15 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
+github:
+  owner: linyows
+  name: homebrew-git-semv
+description: This is a Git plugin for Semantic Versioning.
+homepage: https://github.com/linyows/git-semv
+install: |
+  bin.install Dir['git-semv']
+  #  zsh_completion.install "misc/completion.zsh"
+  #  bash_completion.install "misc/completion.bash"
+  #  fish_completion.install "misc/completion.fish"
+test: |
+  system "#{bin}/git-semv"
