@@ -1,7 +1,11 @@
 language: go
 go:
   - 1.11.x
+  - 1.12.x
   - master
+matrix:
+  allow_failures:
+    - go: master
 env:
   - GO111MODULE=on
 before_script:
@@ -18,7 +22,7 @@ deploy:
     script: curl -sL https://git.io/goreleaser | bash
     on:
       tags: true
-      go: 1.11.x
+      go: 1.12.x
       condition: $TRAVIS_OS_NAME = linux
 notifications:
   slack: linyows:2oeZ2qcLnaMjbnEYodwEXKTr
