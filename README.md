@@ -35,6 +35,13 @@ Or, you can download using `go get` depending on the version of Go1.11 or higher
 $ go get -u github.com/linyows/git-semv/cmd/git-semv
 ```
 
+### Homebrew
+
+```sh
+$ brew tap linyows/git-semv
+$ brew install git-semv
+```
+
 Usage
 --
 
