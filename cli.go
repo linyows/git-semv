@@ -139,7 +139,7 @@ func (c *cli) run() int {
 		if err != nil {
 			fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		}
-		if c.All == false {
+		if !c.All {
 			list = list.WithoutPreRelease()
 		}
 		fmt.Fprintf(c.env.Out, "%s\n", list)
@@ -158,10 +158,10 @@ func (c *cli) run() int {
 		}
 		next := latest.Next(c.command)
 		if c.Pre || c.PreName != "" {
-			next.PreRelease(c.PreName)
+			_, _ = next.PreRelease(c.PreName)
 		}
 		if c.Build || c.BuildName != "" {
-			next.Build(c.BuildName)
+			_, _ = next.Build(c.BuildName)
 		}
 		if c.Bump {
 			if gitTagCmder == nil {

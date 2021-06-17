@@ -115,11 +115,11 @@ v13.0.0-alpha.0
 			t.Errorf("test[%d]: status = %d; want %d", i, status, tt.wantS)
 		}
 
-		if bytes.Compare(tt.wantO, out.Bytes()) != 0 {
+		if !bytes.Equal(tt.wantO, out.Bytes()) {
 			t.Errorf("test[%d]: stdout = %s; want %s", i, out, tt.wantO)
 		}
 
-		if bytes.Compare(tt.wantE, err.Bytes()) != 0 {
+		if !bytes.Equal(tt.wantE, err.Bytes()) {
 			t.Errorf("test[%d]: stderr = %s; want %s", i, err, tt.wantE)
 		}
 	}
@@ -134,10 +134,10 @@ func TestRunCLI(t *testing.T) {
 	if status != 0 {
 		t.Errorf("exit status = %d; want 0", status)
 	}
-	if bytes.Compare([]byte(""), out.Bytes()) != 0 {
+	if !bytes.Equal([]byte(""), out.Bytes()) {
 		t.Errorf("output = %s; want empty", out)
 	}
-	if bytes.Compare([]byte(ver), err.Bytes()) != 0 {
+	if !bytes.Equal([]byte(ver), err.Bytes()) {
 		t.Errorf("err = %v; want %s", err, ver)
 	}
 }

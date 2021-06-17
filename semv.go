@@ -75,7 +75,7 @@ func (v *Semv) PreRelease(name string) (*Semv, error) {
 	}
 
 	similar := list.FindSimilar(v.data)
-	if similar.IsEmpty() == false {
+	if !similar.IsEmpty() {
 		v.cloneForPreRelease(similar)
 	}
 
@@ -87,7 +87,7 @@ func (v *Semv) PreRelease(name string) (*Semv, error) {
 			if pre.IsNumeric() && mustIncremnt && i < 3 {
 				v.data.Pre[i].VersionNum++
 				incremented = true
-			} else if pre.IsNumeric() == false && i == 0 {
+			} else if !pre.IsNumeric() && i == 0 {
 				if pre.VersionStr == prefix {
 					mustIncremnt = true
 				} else if pre.Compare(semver.PRVersion{VersionStr: prefix, IsNum: false}) == 1 {
@@ -99,7 +99,7 @@ func (v *Semv) PreRelease(name string) (*Semv, error) {
 			}
 		}
 
-		if incremented == true {
+		if incremented {
 			return v, nil
 		}
 	}
