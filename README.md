@@ -1,27 +1,26 @@
-git-semv
-==
+<p align="center"><br><br><br><br>
+:bookmark:<br>
+<b>Git Semantic Versioning</b>
+</p>
 
-This is a [Git][git] plugin for [Semantic Versioning][semver].
+<p align="center">
+  <strong>git-semv</strong>: This is a <a href="https://git-scm.com/">Git</a> plugin for <a href="https://semver.org/">Semantic Versioning</a>.
+</p>
+
+<p align="center">
+  <a href="https://github.com/linyows/git-semv/actions/workflows/test.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/linyows/git-semv/Test?label=Test&style=for-the-badge"></a>
+  <a href="https://github.com/linyows/git-semv/actions/workflows/build.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/linyows/git-semv/Build%20by%20matrix?style=for-the-badge"></a>
+  <a href="https://github.com/linyows/git-semv/releases"><img src="http://img.shields.io/github/release/linyows/git-semv.svg?style=for-the-badge" alt="GitHub Release"></a>
+  <a href="https://github.com/linyows/git-semv/blob/main/LICENSE"><img src="http://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License"></a>
+  <a href="http://godoc.org/github.com/linyows/git-semv"><img src="http://img.shields.io/badge/go-documentation-blue.svg?style=for-the-badge" alt="Go Documentation"></a>
+  <a href="https://codecov.io/gh/linyows/git-semv"> <img src="https://img.shields.io/codecov/c/github/linyows/git-semv.svg?style=for-the-badge" alt="codecov"></a>
+</p>
 
 The usefulness of Semantic Versioning has been accepted by OSS in advance.
 And, with the appearance of Go modules, Semantic Versioning became indispensable for the development of the Go library.
 However, `git tag` used for versioning can not support pre-releases and sorts including build information for managing Semantic Versioning.
 Also, it is not easy to increment the version.
 This `git-semv` is a CLI tool for solving these problems and functions as git subcommand.
-
-[![travis](https://img.shields.io/travis/linyows/git-semv.svg?style=for-the-badge)][travis]
-[![codecov](https://img.shields.io/codecov/c/github/linyows/git-semv.svg?style=for-the-badge)][codecov]
-[![release](http://img.shields.io/github/release/linyows/git-semv.svg?style=for-the-badge)][release]
-[![godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=for-the-badge)][godoc]
-[![license](http://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)][license]
-
-[travis]: https://travis-ci.org/linyows/git-semv
-[release]: https://github.com/linyows/git-semv/releases
-[license]: https://github.com/linyows/git-semv/blob/master/LICENSE
-[godoc]: http://godoc.org/github.com/linyows/git-semv
-[codecov]: https://codecov.io/gh/linyows/git-semv
-[semver]: https://semver.org/
-[git]: https://git-scm.com/
 
 Japanese: https://tomohisaoda.com/posts/2018/do-semantic-versioning-for-app.html
 
@@ -117,6 +116,8 @@ $ git semv patch --bump
 Bumped version to v1.1.2
 #==> git tag v1.1.2 && git push origin v1.1.2
 ```
+
+[release]: https://github.com/linyows/git-semv/releases
 
 VS.
 --
