@@ -31,18 +31,19 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-brew:
-  github:
-    owner: linyows
-    name: homebrew-git-semv
-  description: This is a Git plugin for Semantic Versioning.
-  homepage: https://github.com/linyows/git-semv
-  dependencies:
-    - git
-  install: |
-    bin.install "git-semv"
-    #  zsh_completion.install "misc/completion.zsh"
-    #  bash_completion.install "misc/completion.bash"
-    #  fish_completion.install "misc/completion.fish"
-  test: |
-    system "#{bin}/git-semv -v"
+brews:
+  - tap:
+      owner: linyows
+      name: homebrew-git-semv
+    homepage: https://github.com/linyows/git-semv
+    description: This is a Git plugin for Semantic Versioning.
+    license: "MIT"
+    dependencies:
+      - git
+    install: |
+      bin.install "git-semv"
+      #  zsh_completion.install "misc/completion.zsh"
+      #  bash_completion.install "misc/completion.bash"
+      #  fish_completion.install "misc/completion.fish"
+    test: |
+      system "#{bin}/git-semv -v"
