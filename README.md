@@ -5,7 +5,7 @@
 
 <p align="center">
   <strong>git-semv</strong>: This is a <a href="https://git-scm.com/">Git</a> plugin for <a href="https://semver.org/">Semantic Versioning</a>.
-</p>
+</p><br><br><br><br>
 
 <p align="center">
   <a href="https://github.com/linyows/git-semv/actions/workflows/test.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/linyows/git-semv/Test?label=Test&style=for-the-badge"></a>
