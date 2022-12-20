@@ -8,8 +8,8 @@
 </p><br><br><br><br>
 
 <p align="center">
-  <a href="https://github.com/linyows/git-semv/actions/workflows/test.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/linyows/git-semv/Test?label=Test&style=for-the-badge"></a>
-  <a href="https://github.com/linyows/git-semv/actions/workflows/build.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/linyows/git-semv/Build%20by%20matrix?style=for-the-badge"></a>
+  <a href="https://github.com/linyows/git-semv/actions/workflows/test.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/linyows/git-semv/test.yml?branch=main&label=Test&style=for-the-badge"></a>
+  <a href="https://github.com/linyows/git-semv/actions/workflows/build.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/linyows/git-semv/build.yml?branch=main&style=for-the-badge"></a>
   <a href="https://github.com/linyows/git-semv/releases"><img src="http://img.shields.io/github/release/linyows/git-semv.svg?style=for-the-badge" alt="GitHub Release"></a>
   <a href="https://github.com/linyows/git-semv/blob/main/LICENSE"><img src="http://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License"></a>
   <a href="http://godoc.org/github.com/linyows/git-semv"><img src="http://img.shields.io/badge/go-documentation-blue.svg?style=for-the-badge" alt="Go Documentation"></a>
