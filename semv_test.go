@@ -1,7 +1,7 @@
 package semv
 
 import (
-	"fmt"
+	"errors"
 	"testing"
 )
 
@@ -13,7 +13,7 @@ type MockedCmd struct {
 func (c MockedCmd) Do(name string, arg ...string) ([]byte, error) {
 	var err error
 	if c.Err != "" {
-		err = fmt.Errorf(c.Err)
+		err = errors.New(c.Err)
 	}
 	return []byte(c.Out), err
 }
