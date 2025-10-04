@@ -8,14 +8,26 @@ import (
 
 // MockedCmdCapture is a mock command that captures the command and arguments
 type MockedCmdCapture struct {
-	Out         string
-	Err         string
-	CaptureFunc func(name string, args ...string)
+	Out            string
+	Err            string
+	CaptureFunc    func(name string, args ...string)
+	CaptureEnvFunc func(name string, env []string, args ...string)
 }
 
 func (c MockedCmdCapture) Do(name string, arg ...string) ([]byte, error) {
 	if c.CaptureFunc != nil {
 		c.CaptureFunc(name, arg...)
+	}
+	var err error
+	if c.Err != "" {
+		err = errors.New(c.Err)
+	}
+	return []byte(c.Out), err
+}
+
+func (c MockedCmdCapture) DoWithEnv(name string, env []string, arg ...string) ([]byte, error) {
+	if c.CaptureEnvFunc != nil {
+		c.CaptureEnvFunc(name, env, arg...)
 	}
 	var err error
 	if c.Err != "" {
@@ -164,11 +176,13 @@ func TestRunCLI(t *testing.T) {
 func TestGitTagAnnotation(t *testing.T) {
 	// Mock cmd to capture git tag command arguments
 	capturedCmds := [][]string{}
+	capturedEnvs := [][]string{}
 	gitTagCmder = MockedCmdCapture{
 		Out: "",
 		Err: "",
-		CaptureFunc: func(name string, args ...string) {
+		CaptureEnvFunc: func(name string, env []string, args ...string) {
 			capturedCmds = append(capturedCmds, append([]string{name}, args...))
+			capturedEnvs = append(capturedEnvs, env)
 		},
 	}
 	gitPushTagCmder = MockedCmd{Out: "", Err: ""}
@@ -203,5 +217,10 @@ func TestGitTagAnnotation(t *testing.T) {
 			t.Errorf("expected git tag command %v, got %v", expectedCmd, gitTagCmd)
 			break
 		}
+	}
+
+	// Verify environment variables are passed (note: actual values depend on git config)
+	if len(capturedEnvs) == 0 {
+		t.Fatal("expected environment variables to be passed")
 	}
 }

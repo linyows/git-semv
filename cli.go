@@ -3,6 +3,8 @@ package semv
 import (
 	"fmt"
 	"io"
+	"os"
+	"os/exec"
 	"reflect"
 	"strings"
 
@@ -46,6 +48,29 @@ var gitPushTagCmder Cmder
 // RunCLI runs for CLI
 func RunCLI(env Env) int {
 	return (&cli{env: env}).run()
+}
+
+// getGitConfig gets git config value
+func getGitConfig(key string) string {
+	out, err := exec.Command("git", "config", key).Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(out))
+}
+
+// prepareAuthorEnv prepares environment variables for git author
+func prepareAuthorEnv() []string {
+	env := os.Environ()
+
+	if name := getGitConfig("user.name"); name != "" {
+		env = append(env, "GIT_AUTHOR_NAME="+name)
+	}
+	if email := getGitConfig("user.email"); email != "" {
+		env = append(env, "GIT_AUTHOR_EMAIL="+email)
+	}
+
+	return env
 }
 
 func (c *cli) buildHelp(names []string) []string {
@@ -167,7 +192,8 @@ func (c *cli) run() int {
 			if gitTagCmder == nil {
 				gitTagCmder = Cmd{}
 			}
-			_, err = gitTagCmder.Do("git", "tag", "-a", next.String(), "-m", "tagged by git-semv")
+			env := prepareAuthorEnv()
+			_, err = gitTagCmder.DoWithEnv("git", env, "tag", "-a", next.String(), "-m", "tagged by git-semv")
 			if err != nil {
 				fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 				return ExitErr
