@@ -2,8 +2,27 @@ package semv
 
 import (
 	"bytes"
+	"errors"
 	"testing"
 )
+
+// MockedCmdCapture is a mock command that captures the command and arguments
+type MockedCmdCapture struct {
+	Out         string
+	Err         string
+	CaptureFunc func(name string, args ...string)
+}
+
+func (c MockedCmdCapture) Do(name string, arg ...string) ([]byte, error) {
+	if c.CaptureFunc != nil {
+		c.CaptureFunc(name, arg...)
+	}
+	var err error
+	if c.Err != "" {
+		err = errors.New(c.Err)
+	}
+	return []byte(c.Out), err
+}
 
 func TestCLIRun(t *testing.T) {
 	ver := `git-semv version dev [none, unknown]
@@ -139,5 +158,50 @@ func TestRunCLI(t *testing.T) {
 	}
 	if !bytes.Equal([]byte(ver), err.Bytes()) {
 		t.Errorf("err = %v; want %s", err, ver)
+	}
+}
+
+func TestGitTagAnnotation(t *testing.T) {
+	// Mock cmd to capture git tag command arguments
+	capturedCmds := [][]string{}
+	gitTagCmder = MockedCmdCapture{
+		Out: "",
+		Err: "",
+		CaptureFunc: func(name string, args ...string) {
+			capturedCmds = append(capturedCmds, append([]string{name}, args...))
+		},
+	}
+	gitPushTagCmder = MockedCmd{Out: "", Err: ""}
+	tagCmder = MockedCmd{Out: mixed}
+	usernameCmder = MockedCmd{Out: "foobar\n", Err: ""}
+	latestCommitCmder = MockedCmd{Out: "2f994ff\n", Err: ""}
+
+	out, err := new(bytes.Buffer), new(bytes.Buffer)
+	env := Env{Out: out, Err: err, Args: []string{"major", "--bump"}, Version: "dev", Commit: "none", Date: "unknown"}
+	cli := &cli{env: env}
+	status := cli.run()
+
+	if status != ExitOK {
+		t.Errorf("expected exit status %d, got %d", ExitOK, status)
+	}
+
+	// Verify git tag command includes annotation flags
+	if len(capturedCmds) == 0 {
+		t.Fatal("expected git tag command to be called")
+	}
+
+	gitTagCmd := capturedCmds[0]
+	expectedCmd := []string{"git", "tag", "v13.0.0"}
+
+	if len(gitTagCmd) != len(expectedCmd) {
+		t.Errorf("expected git tag command %v, got %v", expectedCmd, gitTagCmd)
+		return
+	}
+
+	for i, arg := range expectedCmd {
+		if gitTagCmd[i] != arg {
+			t.Errorf("expected git tag command %v, got %v", expectedCmd, gitTagCmd)
+			break
+		}
 	}
 }
