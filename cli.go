@@ -3,6 +3,8 @@ package semv
 import (
 	"fmt"
 	"io"
+	"os"
+	"os/exec"
 	"reflect"
 	"strings"
 
@@ -46,6 +48,29 @@ var gitPushTagCmder Cmder
 // RunCLI runs for CLI
 func RunCLI(env Env) int {
 	return (&cli{env: env}).run()
+}
+
+// getGitConfig gets git config value
+func getGitConfig(key string) string {
+	out, err := exec.Command("git", "config", key).Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(out))
+}
+
+// prepareAuthorEnv prepares environment variables for git author
+func prepareAuthorEnv() []string {
+	env := os.Environ()
+
+	if name := getGitConfig("user.name"); name != "" {
+		env = append(env, "GIT_AUTHOR_NAME="+name)
+	}
+	if email := getGitConfig("user.email"); email != "" {
+		env = append(env, "GIT_AUTHOR_EMAIL="+email)
+	}
+
+	return env
 }
 
 func (c *cli) buildHelp(names []string) []string {
@@ -106,14 +131,14 @@ Commands:
 Options:
 %s
 `
-	fmt.Fprintf(c.env.Out, help, opts)
+	_, _ = fmt.Fprintf(c.env.Out, help, opts)
 }
 
 func (c *cli) run() int {
 	p := flags.NewParser(c, flags.PassDoubleDash)
 	args, err := p.ParseArgs(c.env.Args)
 	if err != nil {
-		fmt.Fprintf(c.env.Err, "Error: %s\n", err)
+		_, _ = fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		return ExitErr
 	}
 
@@ -123,7 +148,7 @@ func (c *cli) run() int {
 	}
 
 	if c.Version {
-		fmt.Fprintf(c.env.Err, "git-semv version %s [%v, %v]\n", c.env.Version, c.env.Commit, c.env.Date)
+		_, _ = fmt.Fprintf(c.env.Err, "git-semv version %s [%v, %v]\n", c.env.Version, c.env.Commit, c.env.Date)
 		return ExitOK
 	}
 
@@ -137,24 +162,24 @@ func (c *cli) run() int {
 	case "list":
 		list, err := GetList()
 		if err != nil {
-			fmt.Fprintf(c.env.Err, "Error: %s\n", err)
+			_, _ = fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		}
 		if !c.All {
 			list = list.WithoutPreRelease()
 		}
-		fmt.Fprintf(c.env.Out, "%s\n", list)
+		_, _ = fmt.Fprintf(c.env.Out, "%s\n", list)
 
 	case "now", "latest":
 		latest, err := Latest()
 		if err != nil {
-			fmt.Fprintf(c.env.Err, "Error: %s\n", err)
+			_, _ = fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		}
-		fmt.Fprintf(c.env.Out, "%s\n", latest)
+		_, _ = fmt.Fprintf(c.env.Out, "%s\n", latest)
 
 	case "major", "minor", "patch":
 		latest, err := Latest()
 		if err != nil {
-			fmt.Fprintf(c.env.Err, "Error: %s\n", err)
+			_, _ = fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		}
 		next := latest.Next(c.command)
 		if c.Pre || c.PreName != "" {
@@ -167,9 +192,10 @@ func (c *cli) run() int {
 			if gitTagCmder == nil {
 				gitTagCmder = Cmd{}
 			}
-			_, err = gitTagCmder.Do("git", "tag", next.String())
+			env := prepareAuthorEnv()
+			_, err = gitTagCmder.DoWithEnv("git", env, "tag", "-a", next.String(), "-m", "tagged by git-semv")
 			if err != nil {
-				fmt.Fprintf(c.env.Err, "Error: %s\n", err)
+				_, _ = fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 				return ExitErr
 			}
 			if gitPushTagCmder == nil {
@@ -177,16 +203,16 @@ func (c *cli) run() int {
 			}
 			_, err = gitPushTagCmder.Do("git", "push", "origin", next.String())
 			if err != nil {
-				fmt.Fprintf(c.env.Err, "Error: %s\n", err)
+				_, _ = fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 				return ExitErr
 			}
-			fmt.Fprintf(c.env.Out, "Bumped version to %s\n", next)
+			_, _ = fmt.Fprintf(c.env.Out, "Bumped version to %s\n", next)
 		} else {
-			fmt.Fprintf(c.env.Out, "%s\n", next)
+			_, _ = fmt.Fprintf(c.env.Out, "%s\n", next)
 		}
 
 	default:
-		fmt.Fprintf(c.env.Err, "Error: command is not available: %s\n", c.command)
+		_, _ = fmt.Fprintf(c.env.Err, "Error: command is not available: %s\n", c.command)
 		c.showHelp()
 		return ExitErr
 	}

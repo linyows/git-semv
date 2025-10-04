@@ -18,6 +18,14 @@ func (c MockedCmd) Do(name string, arg ...string) ([]byte, error) {
 	return []byte(c.Out), err
 }
 
+func (c MockedCmd) DoWithEnv(name string, env []string, arg ...string) ([]byte, error) {
+	var err error
+	if c.Err != "" {
+		err = errors.New(c.Err)
+	}
+	return []byte(c.Out), err
+}
+
 var mixed = `1.0.0
 bar-0
 foo
