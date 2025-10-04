@@ -8,7 +8,7 @@ import (
 )
 
 // TagCmd for tag list
-var TagCmd = []string{"tag", "--list", "--sort=v:refname", "--format=%(refname:short)\t%(authordate:iso)\t%(subject)\t%(authorname)"}
+var TagCmd = []string{"tag", "--list", "--sort=v:refname", "--format=%(refname:short)\t%(taggerdate:iso)\t%(taggername)"}
 var git = "git"
 var tagCmder Cmder
 var defaultVersion = "0.0.0"
@@ -16,14 +16,13 @@ var defaultVersion = "0.0.0"
 // TagInfo holds tag information including metadata
 type TagInfo struct {
 	Version    semver.Version
-	AuthorDate string
-	Subject    string
-	AuthorName string
+	TaggerDate string
+	TaggerName string
 }
 
 // Format returns formatted tag info string
 func (t *TagInfo) Format(tagName string) string {
-	return tagName + "\t" + t.AuthorDate + "\t" + t.Subject + "\t" + t.AuthorName
+	return tagName + "\t" + t.TaggerDate + "\t" + t.TaggerName
 }
 
 // List struct
@@ -136,25 +135,12 @@ func getVersions() (semver.Versions, map[string]*TagInfo, error) {
 
 		list = append(list, sv)
 
-		// Store tag info if we have author date, subject, and name
-		if len(parts) >= 4 {
-			authorDate := parts[1]
-			if authorDate == "" {
-				authorDate = "-"
-			}
-			subject := parts[2]
-			if subject == "" {
-				subject = "-"
-			}
-			authorName := parts[3]
-			if authorName == "" {
-				authorName = "-"
-			}
+		// Store tag info if we have tagger date and name
+		if len(parts) >= 3 {
 			tagInfos[tagName] = &TagInfo{
 				Version:    sv,
-				AuthorDate: authorDate,
-				Subject:    subject,
-				AuthorName: authorName,
+				TaggerDate: parts[1],
+				TaggerName: parts[2],
 			}
 		}
 	}
