@@ -8,23 +8,37 @@ import (
 )
 
 // TagCmd for tag list
-var TagCmd = []string{"tag", "--list", "--sort=v:refname"}
+var TagCmd = []string{"tag", "--list", "--sort=v:refname", "--format=%(refname:short)\t%(authordate:iso)\t%(subject)\t%(authorname)"}
 var git = "git"
 var tagCmder Cmder
 var defaultVersion = "0.0.0"
 
+// TagInfo holds tag information including metadata
+type TagInfo struct {
+	Version    semver.Version
+	AuthorDate string
+	Subject    string
+	AuthorName string
+}
+
+// Format returns formatted tag info string
+func (t *TagInfo) Format(tagName string) string {
+	return tagName + "\t" + t.AuthorDate + "\t" + t.Subject + "\t" + t.AuthorName
+}
+
 // List struct
 type List struct {
-	data semver.Versions
+	data     semver.Versions
+	tagInfos map[string]*TagInfo
 }
 
 // GetList returns List
 func GetList() (*List, error) {
-	list, err := getVersions()
+	list, tagInfos, err := getVersions()
 	if err != nil {
 		return nil, err
 	}
-	return &List{data: list}, nil
+	return &List{data: list, tagInfos: tagInfos}, nil
 }
 
 // FindSimilar finds similar one
@@ -42,7 +56,12 @@ func (l *List) FindSimilar(v semver.Version) *Semv {
 func (l *List) String() string {
 	var ll []string
 	for _, v := range l.data {
-		ll = append(ll, defaultTagPrefix+v.String())
+		tagName := defaultTagPrefix + v.String()
+		if info, ok := l.tagInfos[tagName]; ok {
+			ll = append(ll, info.Format(tagName))
+		} else {
+			ll = append(ll, tagName)
+		}
 	}
 	return strings.Join(ll, "\n")
 }
@@ -64,7 +83,7 @@ func (l *List) WithoutPreRelease() *List {
 		}
 		list = append(list, v)
 	}
-	return &List{data: list}
+	return &List{data: list, tagInfos: l.tagInfos}
 }
 
 // OnlyPreRelease includes only pre-release
@@ -76,18 +95,18 @@ func (l *List) OnlyPreRelease() *List {
 		}
 		list = append(list, v)
 	}
-	return &List{data: list}
+	return &List{data: list, tagInfos: l.tagInfos}
 }
 
 // getVersions executes git tag as command
-func getVersions() (semver.Versions, error) {
+func getVersions() (semver.Versions, map[string]*TagInfo, error) {
 	if tagCmder == nil {
 		tagCmder = Cmd{}
 	}
 
 	b, err := tagCmder.Do(git, TagCmd...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	b = bytes.TrimSpace(b)
 
@@ -97,20 +116,49 @@ func getVersions() (semver.Versions, error) {
 	}
 
 	var list semver.Versions
-	for _, v := range vv {
+	tagInfos := make(map[string]*TagInfo)
+
+	for _, line := range vv {
+		parts := strings.Split(line, "\t")
+		tagName := parts[0]
+
 		if defaultTagPrefix != "" {
-			trimmed := strings.TrimPrefix(v, defaultTagPrefix)
-			if trimmed == v {
+			trimmed := strings.TrimPrefix(tagName, defaultTagPrefix)
+			if trimmed == tagName {
 				continue
 			}
 		}
-		sv, err := semver.ParseTolerant(v)
+
+		sv, err := semver.ParseTolerant(tagName)
 		if err != nil {
 			continue
 		}
+
 		list = append(list, sv)
+
+		// Store tag info if we have author date, subject, and name
+		if len(parts) >= 4 {
+			authorDate := parts[1]
+			if authorDate == "" {
+				authorDate = "-"
+			}
+			subject := parts[2]
+			if subject == "" {
+				subject = "-"
+			}
+			authorName := parts[3]
+			if authorName == "" {
+				authorName = "-"
+			}
+			tagInfos[tagName] = &TagInfo{
+				Version:    sv,
+				AuthorDate: authorDate,
+				Subject:    subject,
+				AuthorName: authorName,
+			}
+		}
 	}
 	semver.Sort(list)
 
-	return list, nil
+	return list, tagInfos, nil
 }
