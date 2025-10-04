@@ -131,14 +131,14 @@ Commands:
 Options:
 %s
 `
-	fmt.Fprintf(c.env.Out, help, opts)
+	_, _ = fmt.Fprintf(c.env.Out, help, opts)
 }
 
 func (c *cli) run() int {
 	p := flags.NewParser(c, flags.PassDoubleDash)
 	args, err := p.ParseArgs(c.env.Args)
 	if err != nil {
-		fmt.Fprintf(c.env.Err, "Error: %s\n", err)
+		_, _ = fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		return ExitErr
 	}
 
@@ -148,7 +148,7 @@ func (c *cli) run() int {
 	}
 
 	if c.Version {
-		fmt.Fprintf(c.env.Err, "git-semv version %s [%v, %v]\n", c.env.Version, c.env.Commit, c.env.Date)
+		_, _ = fmt.Fprintf(c.env.Err, "git-semv version %s [%v, %v]\n", c.env.Version, c.env.Commit, c.env.Date)
 		return ExitOK
 	}
 
