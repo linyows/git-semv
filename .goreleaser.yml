@@ -1,3 +1,5 @@
+version: 2
+
 before:
   hooks:
     - go mod tidy
@@ -15,10 +17,11 @@ builds:
       - amd64
       - arm64
 archives:
-  - replacements:
-      386: i386
-      amd64: x86_64
+  - format: tar.gz
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
     files:
       - none*
 checksum:
@@ -32,7 +35,7 @@ changelog:
       - '^docs:'
       - '^test:'
 brews:
-  - tap:
+  - repository:
       owner: linyows
       name: homebrew-git-semv
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
@@ -40,7 +43,7 @@ brews:
     description: This is a Git plugin for Semantic Versioning.
     license: "MIT"
     dependencies:
-      - git
+      - name: git
     install: |
       bin.install "git-semv"
       #  zsh_completion.install "misc/completion.zsh"
