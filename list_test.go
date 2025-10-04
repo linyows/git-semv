@@ -73,3 +73,56 @@ v1.0.2-rc.0`
 		}
 	}
 }
+
+func TestGetListWithTagInfo(t *testing.T) {
+	withInfo := `v1.0.0	2018-11-28 16:05:12 +0900	update README.md	linyows
+v1.0.1	2018-11-29 00:17:14 +0900	specify tags	linyows
+v1.1.0	2019-03-19 11:53:24 +0900	add missing key	linyows`
+
+	want := `v1.0.0	2018-11-28 16:05:12 +0900	update README.md	linyows
+v1.0.1	2018-11-29 00:17:14 +0900	specify tags	linyows
+v1.1.0	2019-03-19 11:53:24 +0900	add missing key	linyows`
+
+	tagCmder = MockedCmd{Out: withInfo}
+	l, err := GetList()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if l.String() != want {
+		t.Errorf("List = %s; want %s", l, want)
+	}
+}
+
+func TestTagInfoFormat(t *testing.T) {
+	tests := []struct {
+		info    *TagInfo
+		tagName string
+		want    string
+	}{
+		{
+			&TagInfo{
+				AuthorDate: "2018-11-28 16:05:12 +0900",
+				Subject:    "update README.md",
+				AuthorName: "linyows",
+			},
+			"v1.0.0",
+			"v1.0.0\t2018-11-28 16:05:12 +0900\tupdate README.md\tlinyows",
+		},
+		{
+			&TagInfo{
+				AuthorDate: "-",
+				Subject:    "-",
+				AuthorName: "-",
+			},
+			"v2.0.0",
+			"v2.0.0\t-\t-\t-",
+		},
+	}
+
+	for i, tt := range tests {
+		got := tt.info.Format(tt.tagName)
+		if got != tt.want {
+			t.Errorf("test[%d]: Format = %s; want %s", i, got, tt.want)
+		}
+	}
+}
