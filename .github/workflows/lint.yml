@@ -18,6 +18,6 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: 1.25.x
-      - uses: golangci/golangci-lint-action@v6
+      - uses: golangci/golangci-lint-action@v7
         with:
           version: v2.5.0
