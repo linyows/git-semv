@@ -162,24 +162,24 @@ func (c *cli) run() int {
 	case "list":
 		list, err := GetList()
 		if err != nil {
-			fmt.Fprintf(c.env.Err, "Error: %s\n", err)
+			_, _ = fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		}
 		if !c.All {
 			list = list.WithoutPreRelease()
 		}
-		fmt.Fprintf(c.env.Out, "%s\n", list)
+		_, _ = fmt.Fprintf(c.env.Out, "%s\n", list)
 
 	case "now", "latest":
 		latest, err := Latest()
 		if err != nil {
-			fmt.Fprintf(c.env.Err, "Error: %s\n", err)
+			_, _ = fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		}
-		fmt.Fprintf(c.env.Out, "%s\n", latest)
+		_, _ = fmt.Fprintf(c.env.Out, "%s\n", latest)
 
 	case "major", "minor", "patch":
 		latest, err := Latest()
 		if err != nil {
-			fmt.Fprintf(c.env.Err, "Error: %s\n", err)
+			_, _ = fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 		}
 		next := latest.Next(c.command)
 		if c.Pre || c.PreName != "" {
@@ -195,7 +195,7 @@ func (c *cli) run() int {
 			env := prepareAuthorEnv()
 			_, err = gitTagCmder.DoWithEnv("git", env, "tag", "-a", next.String(), "-m", "tagged by git-semv")
 			if err != nil {
-				fmt.Fprintf(c.env.Err, "Error: %s\n", err)
+				_, _ = fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 				return ExitErr
 			}
 			if gitPushTagCmder == nil {
@@ -203,16 +203,16 @@ func (c *cli) run() int {
 			}
 			_, err = gitPushTagCmder.Do("git", "push", "origin", next.String())
 			if err != nil {
-				fmt.Fprintf(c.env.Err, "Error: %s\n", err)
+				_, _ = fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 				return ExitErr
 			}
-			fmt.Fprintf(c.env.Out, "Bumped version to %s\n", next)
+			_, _ = fmt.Fprintf(c.env.Out, "Bumped version to %s\n", next)
 		} else {
-			fmt.Fprintf(c.env.Out, "%s\n", next)
+			_, _ = fmt.Fprintf(c.env.Out, "%s\n", next)
 		}
 
 	default:
-		fmt.Fprintf(c.env.Err, "Error: command is not available: %s\n", c.command)
+		_, _ = fmt.Fprintf(c.env.Err, "Error: command is not available: %s\n", c.command)
 		c.showHelp()
 		return ExitErr
 	}
