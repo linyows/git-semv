@@ -191,7 +191,7 @@ func TestGitTagAnnotation(t *testing.T) {
 	}
 
 	gitTagCmd := capturedCmds[0]
-	expectedCmd := []string{"git", "tag", "v13.0.0"}
+	expectedCmd := []string{"git", "tag", "-a", "v13.0.0", "-m", "tagged by git-semv"}
 
 	if len(gitTagCmd) != len(expectedCmd) {
 		t.Errorf("expected git tag command %v, got %v", expectedCmd, gitTagCmd)

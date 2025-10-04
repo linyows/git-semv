@@ -167,7 +167,7 @@ func (c *cli) run() int {
 			if gitTagCmder == nil {
 				gitTagCmder = Cmd{}
 			}
-			_, err = gitTagCmder.Do("git", "tag", next.String())
+			_, err = gitTagCmder.Do("git", "tag", "-a", next.String(), "-m", "tagged by git-semv")
 			if err != nil {
 				fmt.Fprintf(c.env.Err, "Error: %s\n", err)
 				return ExitErr
